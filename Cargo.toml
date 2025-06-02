@@ -2,3 +2,6 @@
 name = "badtracing"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+minifb = "0.28.0"
