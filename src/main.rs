@@ -152,9 +152,9 @@ fn flush_buffer(buffer: &mut Vec<u32>) {
     buffer.iter_mut().for_each(|i| *i = BACKGROUND_COLOR);
 }
 
-fn draw_line(buffer: &mut Vec<u32>, h: u32, c: usize, color: u32) {
+fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
     let offset = (WINDOW_H - h as usize) / 2;
     for i in offset..offset + h as usize {
-        //buffer[c][i] = color;
+        buffer.0[c][i] = color;
     }
 }
