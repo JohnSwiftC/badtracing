@@ -9,10 +9,12 @@ const BACKGROUND_COLOR: u32 = 0;
 const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
 const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
 const SHADOW_ADJUSTMENT: f32 = 5.0; // Scales distance to the amount of brightness removed
+const PLAYER_VELOCITY: f32 = 0.08; // Scales the movement amount determined by the sin and cosine
+const LOOK_SENSE: f32 = 0.05; // Speed of rotation with arrow keys
 
 struct Player {
     position: Position,
-    view_angle: f32, // Principal axis is facing down, deviation is in radians.
+    view_angle: f32, // Principal axis is facing right, deviation is in radians.
 }
 
 impl Player {
@@ -145,11 +147,15 @@ fn main() {
         // cant believe this works, adding input checks
 
         if window.is_key_down(Key::Right) {
-            player.update_angle(0.1);
+            player.update_angle(LOOK_SENSE);
         }
 
         if window.is_key_down(Key::Left) {
-            player.update_angle(-0.1);
+            player.update_angle(-1.0 * LOOK_SENSE);
+        }
+
+        if window.is_key_down(Key::W) {
+            player.update_position(player.view_angle.cos() * PLAYER_VELOCITY, player.view_angle.sin() * PLAYER_VELOCITY);
         }
     }
 }
