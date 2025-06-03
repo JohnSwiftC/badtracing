@@ -72,6 +72,14 @@ impl Buffer2D {
             }
         }
     }
+
+    fn flush(&mut self) {
+        for i in 0..self.0.len() {
+            for k in 0..self.0[0].len() {
+                self.0[i][k] = BACKGROUND_COLOR;
+            }
+        }
+    }
 }
 
 fn main() {
@@ -131,6 +139,8 @@ fn main() {
         flush_buffer(&mut screen_buffer);
         buffer.to_screen(&mut screen_buffer);
         window.update_with_buffer(&screen_buffer, WINDOW_W, WINDOW_H).expect("Window failed to update");
+
+        player.update_angle(0.1);
     }
 
 }
