@@ -4,6 +4,7 @@ const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 1000;
 const FPS: usize = 30;
 const FOCAL_DISTANCE: u32 = 1;
+const BACKGROUND_COLOR: u32 = 0;
 
 struct Player {
     position: Position,
@@ -40,18 +41,16 @@ struct Position {
 }
 
 fn main() {
+
     let mut window = Window::new(
         "badtracing",
         WINDOW_W,
         WINDOW_H,
         WindowOptions::default()
     ).expect("Window failed to open.");
-
-    let mut red = from_u8_rgb(255, 50, 120);
-    let blue = from_u8_rgb(0, 0, 255);
-    let mut red_buffer: Vec<u32> = vec![red; WINDOW_H * WINDOW_W];
-
     window.set_target_fps(FPS);
+
+    let mut buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
 
     let map = [
         [0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
@@ -63,9 +62,7 @@ fn main() {
 
     // Keep window open
     loop {
-        window.update_with_buffer(&red_buffer, WINDOW_W, WINDOW_H).expect("Failed to update window buffer");
-        red = decrease_brightness(red, 5);
-        red_buffer = vec![red; WINDOW_H * WINDOW_W];
+        
     }
 }
 
@@ -97,4 +94,8 @@ fn increase_brightness(color: u32, amount: u32) -> u32 {
     if b + amount <= 255 { b += amount; } else { b = 255; }
 
     (r << 16) | (g << 8) | b
+}
+
+fn flush_buffer(buffer: &mut Vec<u32>) {
+    buffer.iter_mut().for_each(|i| *i = BACKGROUND_COLOR);
 }
