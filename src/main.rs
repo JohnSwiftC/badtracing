@@ -2,6 +2,7 @@ use minifb::{Window, WindowOptions};
 
 const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 1000;
+const FPS: usize = 30;
 
 fn main() {
     let mut window = Window::new(
@@ -11,12 +12,23 @@ fn main() {
         WindowOptions::default()
     ).expect("Window failed to open.");
 
+    //window.set_target_fps(FPS);
+
     let red = from_u8_rgb(255, 0, 0);
-    let buffer: Vec<u32> = vec![red; WINDOW_H * WINDOW_W];
+    let blue = from_u8_rgb(0, 0, 255);
+    let red_buffer: Vec<u32> = vec![red; WINDOW_H * WINDOW_W];
+    let blue_buffer: Vec<u32> = vec!(blue; WINDOW_H * WINDOW_W);
 
     // Keep window open
+    let mut is_red = false;
     loop {
-        window.update_with_buffer(&buffer, WINDOW_W, WINDOW_H).unwrap();
+        if(is_red) {
+            window.update_with_buffer(&blue_buffer, WINDOW_W, WINDOW_H).unwrap();
+            is_red = false;
+        } else {
+            window.update_with_buffer(&red_buffer, WINDOW_W, WINDOW_H).unwrap();
+            is_red = true;
+        }
     }
 }
 
