@@ -22,7 +22,7 @@ fn main() {
     // Keep window open
     let mut is_red = false;
     loop {
-        if(is_red) {
+        if is_red {
             window.update_with_buffer(&blue_buffer, WINDOW_W, WINDOW_H).unwrap();
             is_red = false;
         } else {
