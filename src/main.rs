@@ -2,11 +2,12 @@ use minifb::{Window, WindowOptions};
 
 const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 1000;
-const FPS: usize = 30;
+const FPS: usize = 144;
 const FOCAL_DISTANCE: u32 = 1;
 const VIEWPORT_SIZE: u32 = 1; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
-const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
+const RAY_FINENESS: f32 = 20.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
+const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
 
 struct Player {
     position: Position,
@@ -124,7 +125,7 @@ fn main() {
                     let distance = ((ray_x - player.position.x).powf(2.0)
                         + (ray_y - player.position.y).powf(2.0))
                     .sqrt();
-                    let height = (WINDOW_H as f32 / (distance + 0.1)) as u32; // Avoid division by zero
+                    let height = (WINDOW_H as f32 / (distance + HEIGHT_ADJUSTMENT)) as u32; // Avoid division by zero
                     draw_line(&mut buffer, height.min(WINDOW_H as u32), c, red);
                     break;
                 }
