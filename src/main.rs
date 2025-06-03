@@ -14,26 +14,38 @@ fn main() {
 
     //window.set_target_fps(FPS);
 
-    let red = from_u8_rgb(255, 0, 0);
+    let mut red = from_u8_rgb(255, 0, 0);
     let blue = from_u8_rgb(0, 0, 255);
-    let red_buffer: Vec<u32> = vec![red; WINDOW_H * WINDOW_W];
-    let blue_buffer: Vec<u32> = vec!(blue; WINDOW_H * WINDOW_W);
+    let mut red_buffer: Vec<u32> = vec![red; WINDOW_H * WINDOW_W];
+
+    adjust_brightness(red, 1);
 
     // Keep window open
-    let mut is_red = false;
     loop {
-        if is_red {
-            window.update_with_buffer(&blue_buffer, WINDOW_W, WINDOW_H).unwrap();
-            is_red = false;
-        } else {
-            window.update_with_buffer(&red_buffer, WINDOW_W, WINDOW_H).unwrap();
-            is_red = true;
-        }
+        window.update_with_buffer(&red_buffer, WINDOW_W, WINDOW_H).expect("Failed to update window buffer");
+        //red -= 1 << 16;
+        red_buffer = vec![red; WINDOW_H * WINDOW_W];
     }
 }
 
 // Ripped straight from the docs lol
 fn from_u8_rgb(r: u8, g: u8, b: u8) -> u32 {
     let (r, g, b) = (r as u32, g as u32, b as u32);
+    (r << 16) | (g << 8) | b
+}
+
+fn adjust_brightness(color: u32, amount: u32) -> u32 {
+    let mut r = color >> 16;
+    if amount <= r { r -= amount; }
+    println!("{}", r);
+
+    let mut g = (color - (r << 16)) >> 8;
+    if amount <= g { g -= amount; }
+    println!("{}", g);
+
+    let mut b = color - (r << 16) - (g << 8);
+    if amount <= b { b -= amount; }
+    println!("{}", b);
+
     (r << 16) | (g << 8) | b
 }
