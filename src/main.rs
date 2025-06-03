@@ -36,8 +36,8 @@ fn from_u8_rgb(r: u8, g: u8, b: u8) -> u32 {
 
 fn decrease_brightness(color: u32, amount: u32) -> u32 {
     let mut r = color >> 16;
-    let mut g = (color - (r << 16)) >> 8;
-    let mut b = color - (r << 16) - (g << 8);
+    let mut g = (color >> 8) & 255;
+    let mut b = color & 255;
 
     if amount <= r { r -= amount; } else { r = 0; }
     if amount <= g { g -= amount; } else { g = 0; }
@@ -48,8 +48,8 @@ fn decrease_brightness(color: u32, amount: u32) -> u32 {
 
 fn increase_brightness(color: u32, amount: u32) -> u32 {
     let mut r = color >> 16;
-    let mut g = (color - (r << 16)) >> 8;
-    let mut b = color - (r << 16) - (g << 8);
+    let mut g = (color >> 8) & 255;
+    let mut b = color & 255;
 
     if r + amount <= 255 { r += amount; } else { r = 255; }
     if g + amount <= 255 { g += amount; } else { g = 255; }
