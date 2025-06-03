@@ -12,6 +12,16 @@ struct Player {
 }
 
 impl Player {
+    fn new() -> Self {
+        Self {
+            position: Position {
+                x: 0,
+                y: 0,
+            },
+            view_angle: 0,
+        }
+    }
+
     /// Updates absolute position
     fn set_position(&mut self, x: i32, y: i32) {
         self.position.x = x;
@@ -60,7 +70,9 @@ fn main() {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ];
 
-    // Keep window open
+    let mut player = Player::new();
+
+    // Main loop
     loop {
         
     }
