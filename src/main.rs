@@ -39,9 +39,9 @@ fn decrease_brightness(color: u32, amount: u32) -> u32 {
     let mut g = (color - (r << 16)) >> 8;
     let mut b = color - (r << 16) - (g << 8);
 
-    if amount <= r { r -= amount; }
-    if amount <= g { g -= amount; }
-    if amount <= b { b -= amount; }
+    if amount <= r { r -= amount; } else { r = 0; }
+    if amount <= g { g -= amount; } else { g = 0; }
+    if amount <= b { b -= amount; } else { b = 0; }
 
     (r << 16) | (g << 8) | b
 }
@@ -51,9 +51,9 @@ fn increase_brightness(color: u32, amount: u32) -> u32 {
     let mut g = (color - (r << 16)) >> 8;
     let mut b = color - (r << 16) - (g << 8);
 
-    if r + amount <= 255 { r += amount; }
-    if g + amount <= 255 { g += amount; }
-    if b + amount <= 255 { b += amount; }
+    if r + amount <= 255 { r += amount; } else { r = 255; }
+    if g + amount <= 255 { g += amount; } else { g = 255; }
+    if b + amount <= 255 { b += amount; } else { b = 255; }
 
     (r << 16) | (g << 8) | b
 }
