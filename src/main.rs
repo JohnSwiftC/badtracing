@@ -1,4 +1,4 @@
-use minifb::{Window, WindowOptions};
+use minifb::{Window, WindowOptions, Key};
 
 const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 1000;
@@ -6,7 +6,7 @@ const FPS: usize = 144;
 const FOCAL_DISTANCE: u32 = 1;
 const VIEWPORT_SIZE: u32 = 1; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
-const RAY_FINENESS: f32 = 20.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
+const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
 const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
 
 struct Player {
@@ -91,16 +91,16 @@ fn main() {
     let mut screen_buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
 
     let map = [
-        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
     ];
 
     let mut player = Player::new();
 
-    player.set_position(1.0, 1.0);
+    player.set_position(5.0, 3.0);
 
     // Main loop
     loop {
@@ -141,7 +141,15 @@ fn main() {
             .expect("Window failed to update");
         buffer.flush();
 
-        player.update_angle(0.1);
+        // cant believe this works, adding input checks
+
+        if window.is_key_down(Key::Right) {
+            player.update_angle(0.1);
+        }
+
+        if window.is_key_down(Key::Left) {
+            player.update_angle(-0.1);
+        }
     }
 }
 
