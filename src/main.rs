@@ -16,10 +16,7 @@ struct Player {
 impl Player {
     fn new() -> Self {
         Self {
-            position: Position {
-                x: 0.0,
-                y: 0.0,
-            },
+            position: Position { x: 0.0, y: 0.0 },
             view_angle: 0.0,
         }
     }
@@ -83,15 +80,10 @@ impl Buffer2D {
 }
 
 fn main() {
-
     let red = from_u8_rgb(255, 0, 0);
 
-    let mut window = Window::new(
-        "badtracing",
-        WINDOW_W,
-        WINDOW_H,
-        WindowOptions::default()
-    ).expect("Window failed to open.");
+    let mut window = Window::new("badtracing", WINDOW_W, WINDOW_H, WindowOptions::default())
+        .expect("Window failed to open.");
     window.set_target_fps(FPS);
 
     let mut buffer = Buffer2D::new(WINDOW_W, WINDOW_H);
@@ -115,34 +107,41 @@ fn main() {
             // Calculate ray angle for this column
             let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE as f32;
             let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE as f32).atan();
-            
+
             // Ray direction
             let dx = ray_angle.cos() / RAY_FINENESS;
             let dy = ray_angle.sin() / RAY_FINENESS;
-            
+
             let mut ray_x = player.position.x;
             let mut ray_y = player.position.y;
-            
-            while ray_x <= map[0].len() as f32 - 1.0 && ray_x >= 0.0 && ray_y <= map.len() as f32 - 1.0 && ray_y >= 0.0 {
+
+            while ray_x <= map[0].len() as f32 - 1.0
+                && ray_x >= 0.0
+                && ray_y <= map.len() as f32 - 1.0
+                && ray_y >= 0.0
+            {
                 if map[ray_y.floor() as usize][ray_x.floor() as usize] == 1 {
-                    let distance = ((ray_x - player.position.x).powf(2.0) + (ray_y - player.position.y).powf(2.0)).sqrt();
+                    let distance = ((ray_x - player.position.x).powf(2.0)
+                        + (ray_y - player.position.y).powf(2.0))
+                    .sqrt();
                     let height = (WINDOW_H as f32 / (distance + 0.1)) as u32; // Avoid division by zero
                     draw_line(&mut buffer, height.min(WINDOW_H as u32), c, red);
                     break;
                 }
-                
+
                 ray_x += dx;
                 ray_y += dy;
             }
         }
-        
-        flush_buffer(&mut screen_buffer);
+
         buffer.to_screen(&mut screen_buffer);
-        window.update_with_buffer(&screen_buffer, WINDOW_W, WINDOW_H).expect("Window failed to update");
+        window
+            .update_with_buffer(&screen_buffer, WINDOW_W, WINDOW_H)
+            .expect("Window failed to update");
+        buffer.flush();
 
         player.update_angle(0.1);
     }
-
 }
 
 // Ripped straight from the docs lol
@@ -156,9 +155,21 @@ fn decrease_brightness(color: u32, amount: u32) -> u32 {
     let mut g = (color >> 8) & 255;
     let mut b = color & 255;
 
-    if amount <= r { r -= amount; } else { r = 0; }
-    if amount <= g { g -= amount; } else { g = 0; }
-    if amount <= b { b -= amount; } else { b = 0; }
+    if amount <= r {
+        r -= amount;
+    } else {
+        r = 0;
+    }
+    if amount <= g {
+        g -= amount;
+    } else {
+        g = 0;
+    }
+    if amount <= b {
+        b -= amount;
+    } else {
+        b = 0;
+    }
 
     (r << 16) | (g << 8) | b
 }
@@ -168,9 +179,21 @@ fn increase_brightness(color: u32, amount: u32) -> u32 {
     let mut g = (color >> 8) & 255;
     let mut b = color & 255;
 
-    if r + amount <= 255 { r += amount; } else { r = 255; }
-    if g + amount <= 255 { g += amount; } else { g = 255; }
-    if b + amount <= 255 { b += amount; } else { b = 255; }
+    if r + amount <= 255 {
+        r += amount;
+    } else {
+        r = 255;
+    }
+    if g + amount <= 255 {
+        g += amount;
+    } else {
+        g = 255;
+    }
+    if b + amount <= 255 {
+        b += amount;
+    } else {
+        b = 255;
+    }
 
     (r << 16) | (g << 8) | b
 }
