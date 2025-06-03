@@ -8,6 +8,7 @@ const VIEWPORT_SIZE: u32 = 1; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
 const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
 const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
+const SHADOW_ADJUSTMENT: f32 = 5.0; // Scales distance to the amount of brightness removed
 
 struct Player {
     position: Position,
@@ -126,7 +127,7 @@ fn main() {
                         + (ray_y - player.position.y).powf(2.0))
                     .sqrt();
                     let height = (WINDOW_H as f32 / (distance + HEIGHT_ADJUSTMENT)) as u32; // Avoid division by zero
-                    draw_line(&mut buffer, height.min(WINDOW_H as u32), c, red);
+                    draw_line(&mut buffer, height.min(WINDOW_H as u32), c, decrease_brightness(red, ((distance + 2.0) * (distance + 2.0) * SHADOW_ADJUSTMENT) as u32));
                     break;
                 }
 
