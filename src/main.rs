@@ -2,54 +2,55 @@ use minifb::{Window, WindowOptions};
 
 const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 1000;
-const FPS: usize = 30;
+const FPS: usize = 1;
 const FOCAL_DISTANCE: u32 = 1;
 const VIEWPORT_SIZE: u32 = 1; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
 const RAY_FINENESS: f32 = 2.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
+const DISTANCE_HEIGHT_RATIO: u32 = 2; // Ratio between distance of a ray and the height of the wall it hits
 
 struct Player {
     position: Position,
-    view_angle: i32, // Principal axis is facing down, deviation is in radians.
+    view_angle: f32, // Principal axis is facing down, deviation is in radians.
 }
 
 impl Player {
     fn new() -> Self {
         Self {
             position: Position {
-                x: 0,
-                y: 0,
+                x: 0.0,
+                y: 0.0,
             },
-            view_angle: 0,
+            view_angle: 0.0,
         }
     }
 
     /// Updates absolute position
-    fn set_position(&mut self, x: i32, y: i32) {
+    fn set_position(&mut self, x: f32, y: f32) {
         self.position.x = x;
         self.position.y = y;
     }
 
     /// Updates relative position
-    fn update_position(&mut self, x: i32, y: i32) {
+    fn update_position(&mut self, x: f32, y: f32) {
         self.position.x += x;
         self.position.y += y;
     }
 
     /// Updates absolute angle
-    fn set_angle(&mut self, theta: i32) {
+    fn set_angle(&mut self, theta: f32) {
         self.view_angle = theta;
     }
 
     /// Updates relative angle
-    fn update_angle(&mut self, theta: i32) {
+    fn update_angle(&mut self, theta: f32) {
         self.view_angle += theta;
     }
 }
 
 struct Position {
-    x: i32,
-    y: i32, // this is a 2d x,y coordinate plane
+    x: f32,
+    y: f32, // this is a 2d x,y coordinate plane
 }
 
 /// Buffer with an x, y coordinate system that allows for easy, specific updates.
@@ -63,7 +64,7 @@ impl Buffer2D {
 
     /// Does this in-place to an existing screen buffer
     /// Also hoping that the buffer is the same size as the Buffer2D
-    fn to_screen(self, buffer: &mut Vec<u32>) {
+    fn to_screen(&self, buffer: &mut Vec<u32>) {
         let mut x = 0;
         for i in 0..self.0.len() {
             for k in 0..self.0[0].len() { // super readable
@@ -76,6 +77,8 @@ impl Buffer2D {
 
 fn main() {
 
+    let red = from_u8_rgb(255, 0, 0);
+
     let mut window = Window::new(
         "badtracing",
         WINDOW_W,
@@ -84,7 +87,8 @@ fn main() {
     ).expect("Window failed to open.");
     window.set_target_fps(FPS);
 
-    let mut buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
+    let mut buffer = Buffer2D::new(WINDOW_W, WINDOW_H);
+    let mut screen_buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
 
     let map = [
         [0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
@@ -102,19 +106,33 @@ fn main() {
         // Loop for each column in the screen, cast ray for each
         for c in 0..WINDOW_W {
             if c < WINDOW_W / 2 {
-                let dx = ((VIEWPORT_SIZE / 2) as f32 - column_width * c as f32) / RAY_FINENESS;
-                let dy = (FOCAL_DISTANCE as f32) / RAY_FINENESS;
+                let dx = ((VIEWPORT_SIZE / 2) as f32 - column_width * c as f32);
+                let dy = (FOCAL_DISTANCE as f32);
 
-                let mut ray_x = player.position.x as f32;
-                let mut ray_y = player.position.y as f32;
+                let mut ray_x = player.position.x;
+                let mut ray_y = player.position.y;
 
                 while ray_x <= map.len() as f32 - 1.0 || ray_x > 0.0 || ray_y <= map[0].len() as f32 - 1.0 || ray_y > 0.0 { // Map bounds checks
                     if map[ray_x.floor() as usize][ray_y.floor() as usize] == 1 {
-                        let dist = (ray_x * ray_x + ray_y * ray_y).sqrt();
+                        let height = (ray_x * ray_x + ray_y * ray_y).sqrt().round() as u32 / DISTANCE_HEIGHT_RATIO;
+                        draw_line(&mut buffer, height, c, red);
+                        break;
                     }
+
+                    ray_x += dx;
+                    ray_y += dy;
                 }
-            }
+            } // add else if for the right side of the view port
         }
+
+        flush_buffer(&mut screen_buffer);
+        buffer.to_screen(&mut screen_buffer);
+        window.update_with_buffer(&screen_buffer, WINDOW_W, WINDOW_H).expect("Window failed to update with new buffer, aborting...");
+        break;
+    }
+
+    loop {
+        //pass
     }
 }
 
