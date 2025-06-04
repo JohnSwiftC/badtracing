@@ -108,11 +108,12 @@ impl Skybox {
     // Get pixel color from skybox based on viewing angle and vertical position
     fn get_pixel(&self, angle: f32, vertical_ratio: f32) -> u32 {
     
-        let normalized_angle = (angle % (2.0 * std::f32::consts::PI)) / (2.0 * std::f32::consts::PI);
+        let two_pi = 2.0 * std::f32::consts::PI;
+        let normalized_angle = (angle % (two_pi) + two_pi) / two_pi;
         let u = (normalized_angle * self.width as f32) as u32 % self.width;
         
-        let v = ((1.0 - vertical_ratio.clamp(0.0, 1.0)) * self.height as f32) as u32;
-        let v = v.min(self.height - 1);
+        let mut v = ((1.0 - vertical_ratio.clamp(0.0, 1.0)) * self.height as f32) as u32;
+        v = v.min(self.height - 1);
         
         let pixel = self.image.get_pixel(u, v);
         
