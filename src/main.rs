@@ -1,10 +1,10 @@
 use minifb::{Window, WindowOptions, Key};
 
-const WINDOW_W: usize = 1000;
-const WINDOW_H: usize = 1000;
+const WINDOW_W: usize = 700;
+const WINDOW_H: usize = 700;
 const FPS: usize = 144;
-const FOCAL_DISTANCE: u32 = 1;
-const VIEWPORT_SIZE: u32 = 1; // Width of the viewport used for calculations
+const FOCAL_DISTANCE: f32 = 1.0;
+const VIEWPORT_SIZE: f32 = 1.0; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
 const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
 const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
@@ -109,8 +109,8 @@ fn main() {
     loop {
         for c in 0..WINDOW_W {
             // Calculate ray angle for this column
-            let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE as f32;
-            let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE as f32).atan();
+            let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
+            let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE).atan();
 
             // Ray direction
             let dx = ray_angle.cos() / RAY_FINENESS;
@@ -128,7 +128,8 @@ fn main() {
                     let distance = ((ray_x - player.position.x).powf(2.0)
                         + (ray_y - player.position.y).powf(2.0))
                     .sqrt();
-                    let height = (WINDOW_H as f32 / (distance + HEIGHT_ADJUSTMENT)) as u32; // Avoid division by zero
+                    let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
+                    let height = (WINDOW_H as f32 / (corrected_distance + HEIGHT_ADJUSTMENT)) as u32;
                     draw_line(&mut buffer, height.min(WINDOW_H as u32), c, decrease_brightness(red, ((distance + 2.0) * (distance + 2.0) * SHADOW_ADJUSTMENT) as u32));
                     break;
                 }
@@ -156,6 +157,18 @@ fn main() {
 
         if window.is_key_down(Key::W) {
             player.update_position(player.view_angle.cos() * PLAYER_VELOCITY, player.view_angle.sin() * PLAYER_VELOCITY);
+        }
+
+        if window.is_key_down(Key::S) {
+            player.update_position(-1.0 * player.view_angle.cos() * PLAYER_VELOCITY, -1.0 * player.view_angle.sin() * PLAYER_VELOCITY);
+        }
+
+        if window.is_key_down(Key::A) {
+            player.update_position(player.view_angle.sin() * PLAYER_VELOCITY, -1.0 * player.view_angle.cos() * PLAYER_VELOCITY);
+        }
+
+        if window.is_key_down(Key::D) {
+            player.update_position(-1.0 * player.view_angle.sin() * PLAYER_VELOCITY, player.view_angle.cos() * PLAYER_VELOCITY);
         }
     }
 }
