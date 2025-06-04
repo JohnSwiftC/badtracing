@@ -1,16 +1,17 @@
 use minifb::{Window, WindowOptions, Key};
+use image::{GenericImageView, DynamicImage};
 
 const WINDOW_W: usize = 700;
 const WINDOW_H: usize = 700;
-const FPS: usize = 144;
+const FPS: usize = 60;
 const FOCAL_DISTANCE: f32 = 1.0;
 const VIEWPORT_SIZE: f32 = 1.0; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
 const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
 const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
 const SHADOW_ADJUSTMENT: f32 = 5.0; // Scales distance to the amount of brightness removed
-const PLAYER_VELOCITY: f32 = 0.08; // Scales the movement amount determined by the sin and cosine
-const LOOK_SENSE: f32 = 0.05; // Speed of rotation with arrow keys
+const PLAYER_VELOCITY: f32 = 0.04; // Scales the movement amount determined by the sin and cosine
+const LOOK_SENSE: f32 = 0.02; // Speed of rotation with arrow keys
 
 struct Player {
     position: Position,
@@ -83,8 +84,45 @@ impl Buffer2D {
     }
 }
 
+use std::path::Path;
+
+struct Skybox {
+    image: DynamicImage,
+    width: u32,
+    height: u32,
+}
+
+impl Skybox {
+    
+    fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
+        let image = image::open(path)?;
+        let (width, height) = image.dimensions();
+        
+        Ok(Skybox {
+            image,
+            width,
+            height,
+        })
+    }
+    
+    // Get pixel color from skybox based on viewing angle and vertical position
+    fn get_pixel(&self, angle: f32, vertical_ratio: f32) -> u32 {
+    
+        let normalized_angle = (angle % (2.0 * std::f32::consts::PI)) / (2.0 * std::f32::consts::PI);
+        let u = (normalized_angle * self.width as f32) as u32 % self.width;
+        
+        let v = ((1.0 - vertical_ratio.clamp(0.0, 1.0)) * self.height as f32) as u32;
+        let v = v.min(self.height - 1);
+        
+        let pixel = self.image.get_pixel(u, v);
+        
+        from_u8_rgb(pixel[0], pixel[1], pixel[2])
+    }
+}
+
 fn main() {
     let red = from_u8_rgb(255, 0, 0);
+    let blue = from_u8_rgb(0, 0, 255);
 
     let mut window = Window::new("badtracing", WINDOW_W, WINDOW_H, WindowOptions::default())
         .expect("Window failed to open.");
@@ -100,13 +138,38 @@ fn main() {
         [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
         [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
     ];
-
+    
+    let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
+        
     let mut player = Player::new();
 
     player.set_position(5.0, 3.0);
 
     // Main loop
     loop {
+
+        // draw stupid ass skybox
+        for x in 0..WINDOW_W {
+                
+            let screen_x = (x as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
+            let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE).atan();
+                
+           // Render skybox for upper half of screen
+            for y in 0..(WINDOW_H / 2) {
+                let vertical_ratio = y as f32 / (WINDOW_H / 2) as f32;
+                let color = skybox.get_pixel(ray_angle, vertical_ratio);
+                buffer.0[x][y] = color;
+            }
+        }
+
+        // Add floor with goofy effect
+        for i in 0..buffer.0.len() {
+            for k in (buffer.0[0].len() / 2)..buffer.0[0].len() {
+                buffer.0[i][k] = decrease_brightness(blue, buffer.0[0].len() as u32 - k as u32);
+            }
+        }
+
+        // Render walls
         for c in 0..WINDOW_W {
             // Calculate ray angle for this column
             let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
