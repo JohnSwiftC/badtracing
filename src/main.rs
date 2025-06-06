@@ -121,6 +121,11 @@ impl Skybox {
     }
 }
 
+enum WorldObject {
+    BrickWall,
+    RedWall,
+}
+
 fn main() {
     let red = from_u8_rgb(255, 0, 0);
     let blue = from_u8_rgb(0, 0, 255);
