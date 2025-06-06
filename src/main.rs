@@ -1,10 +1,10 @@
 use minifb::{Window, WindowOptions, Key};
 use image::{GenericImageView, DynamicImage};
 
-const WINDOW_W: usize = 700;
+const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 700;
 const FPS: usize = 60;
-const FOCAL_DISTANCE: f32 = 1.0;
+const FOCAL_DISTANCE: f32 = WINDOW_H as f32 / WINDOW_W as f32;
 const VIEWPORT_SIZE: f32 = 1.0; // Width of the viewport used for calculations
 const BACKGROUND_COLOR: u32 = 0;
 const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
