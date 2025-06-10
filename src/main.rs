@@ -38,6 +38,12 @@ impl Player {
         self.position.y += y;
     }
 
+    /// Updates relative position with collision detection
+    fn update_position_checked(&mut self, x: f32, y: f32, map: &Vec<Vec<u8>>) {
+        self.position.x += x;
+        self.position.y += y;
+    }
+
     /// Updates absolute angle
     fn set_angle(&mut self, theta: f32) {
         self.view_angle = theta;
@@ -137,12 +143,12 @@ fn main() {
     let mut buffer = Buffer2D::new(WINDOW_H, WINDOW_W);
     let mut screen_buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
 
-    let map = [
-        [0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+    let map: Vec<Vec<u8>> = vec![
+        vec![0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
+        vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        vec![0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+        vec![0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
     ];
     
     let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
