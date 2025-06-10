@@ -146,9 +146,17 @@ fn main() {
     ];
     
     let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
-        
-    let mut player = Player::new();
+    
+    // Floor is a static gradient, calculating it only once adds a little performance
+    let mut floor = Buffer2D::new(WINDOW_H, WINDOW_W);
+    for i in 0..floor.0.len() {
+        for k in (floor.0[0].len() / 2)..floor.0[0].len() {
+            floor.0[i][k] = decrease_brightness(blue, floor.0[0].len() as u32 - k as u32);
+        }
+    }
 
+
+    let mut player = Player::new();
     player.set_position(5.0, 3.0);
 
     // Main loop
@@ -169,9 +177,10 @@ fn main() {
         }
 
         // Add floor with goofy effect
+        // Now just pulls from floor buffer2d to save time
         for i in 0..buffer.0.len() {
             for k in (buffer.0[0].len() / 2)..buffer.0[0].len() {
-                buffer.0[i][k] = decrease_brightness(blue, buffer.0[0].len() as u32 - k as u32);
+                buffer.0[i][k] = floor.0[i][k];
             }
         }
 
