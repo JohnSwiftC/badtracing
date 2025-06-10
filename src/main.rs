@@ -56,11 +56,11 @@ struct Position {
 
 /// Buffer with an x, y coordinate system that allows for easy, specific updates.
 /// Includes a method to convert to normal screen buffer
-struct Buffer2D([[u32; WINDOW_H]; WINDOW_W]);
+struct Buffer2D(Vec<Vec<u32>>);
 
 impl Buffer2D {
-    fn new() -> Self {
-        Self([[BACKGROUND_COLOR; WINDOW_H]; WINDOW_W])
+    fn new(height: usize, width: usize) -> Self {
+        Self(vec![vec![BACKGROUND_COLOR; height]; width])
     }
 
     /// Does this in-place to an existing screen buffer
@@ -134,7 +134,7 @@ fn main() {
         .expect("Window failed to open.");
     window.set_target_fps(FPS);
 
-    let mut buffer = Buffer2D::new();
+    let mut buffer = Buffer2D::new(WINDOW_H, WINDOW_W);
     let mut screen_buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
 
     let map = [
