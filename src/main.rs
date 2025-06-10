@@ -40,8 +40,25 @@ impl Player {
 
     /// Updates relative position with collision detection
     fn update_position_checked(&mut self, x: f32, y: f32, map: &Vec<Vec<u8>>) {
-        self.position.x += x;
-        self.position.y += y;
+        let new_x = self.position.x + x;
+        let new_y = self.position.y + y;
+
+        if map[new_y.floor() as usize][self.position.x.floor() as usize] == 1 {
+            self.position.x = new_x;
+            return;
+        }
+
+        if map[self.position.y.floor() as usize][new_x.floor() as usize] == 1 {
+            self.position.y = new_y;
+            return;
+        }
+
+        if map[new_y.floor() as usize][new_x.floor() as usize] == 1 {
+            return;
+        }
+
+        self.position.x = new_x;
+        self.position.y = new_y;
     }
 
     /// Updates absolute angle
@@ -240,19 +257,19 @@ fn main() {
         }
 
         if window.is_key_down(Key::W) {
-            player.update_position(player.view_angle.cos() * PLAYER_VELOCITY, player.view_angle.sin() * PLAYER_VELOCITY);
+            player.update_position_checked(player.view_angle.cos() * PLAYER_VELOCITY, player.view_angle.sin() * PLAYER_VELOCITY, &map);
         }
 
         if window.is_key_down(Key::S) {
-            player.update_position(-1.0 * player.view_angle.cos() * PLAYER_VELOCITY, -1.0 * player.view_angle.sin() * PLAYER_VELOCITY);
+            player.update_position_checked(-1.0 * player.view_angle.cos() * PLAYER_VELOCITY, -1.0 * player.view_angle.sin() * PLAYER_VELOCITY, &map);
         }
 
         if window.is_key_down(Key::A) {
-            player.update_position(player.view_angle.sin() * PLAYER_VELOCITY, -1.0 * player.view_angle.cos() * PLAYER_VELOCITY);
+            player.update_position_checked(player.view_angle.sin() * PLAYER_VELOCITY, -1.0 * player.view_angle.cos() * PLAYER_VELOCITY, &map);
         }
 
         if window.is_key_down(Key::D) {
-            player.update_position(-1.0 * player.view_angle.sin() * PLAYER_VELOCITY, player.view_angle.cos() * PLAYER_VELOCITY);
+            player.update_position_checked(-1.0 * player.view_angle.sin() * PLAYER_VELOCITY, player.view_angle.cos() * PLAYER_VELOCITY, &map);
         }
     }
 }
