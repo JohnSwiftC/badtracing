@@ -256,21 +256,31 @@ fn main() {
             player.update_angle(-1.0 * LOOK_SENSE);
         }
 
+        // Add all movements together THEN apply
+        let mut nx = 0.0;
+        let mut ny = 0.0;
+
         if window.is_key_down(Key::W) {
-            player.update_position_checked(player.view_angle.cos() * PLAYER_VELOCITY, player.view_angle.sin() * PLAYER_VELOCITY, &map);
+            nx += player.view_angle.cos() * PLAYER_VELOCITY;
+            ny += player.view_angle.sin() * PLAYER_VELOCITY;
         }
 
         if window.is_key_down(Key::S) {
-            player.update_position_checked(-1.0 * player.view_angle.cos() * PLAYER_VELOCITY, -1.0 * player.view_angle.sin() * PLAYER_VELOCITY, &map);
+            nx += -1.0 * player.view_angle.cos() * PLAYER_VELOCITY;
+            ny += -1.0 * player.view_angle.sin() * PLAYER_VELOCITY;
         }
 
         if window.is_key_down(Key::A) {
-            player.update_position_checked(player.view_angle.sin() * PLAYER_VELOCITY, -1.0 * player.view_angle.cos() * PLAYER_VELOCITY, &map);
+            nx += player.view_angle.sin() * PLAYER_VELOCITY;
+            ny += -1.0 * player.view_angle.cos() * PLAYER_VELOCITY;
         }
 
         if window.is_key_down(Key::D) {
-            player.update_position_checked(-1.0 * player.view_angle.sin() * PLAYER_VELOCITY, player.view_angle.cos() * PLAYER_VELOCITY, &map);
+            nx += -1.0 * player.view_angle.sin() * PLAYER_VELOCITY;
+            ny += player.view_angle.cos() * PLAYER_VELOCITY;
         }
+
+        player.update_position_checked(nx, ny, &map);
     }
 }
 
