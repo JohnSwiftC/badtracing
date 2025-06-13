@@ -262,16 +262,13 @@ fn main() {
             {
                 let (ray_x_floor, ray_y_floor) = (ray_x.floor(), ray_y.floor());
 
-
                 if map[ray_y_floor as usize][ray_x_floor as usize] == 1 {
                     let distance = ((ray_x - player.position.x).powf(2.0)
                         + (ray_y - player.position.y).powf(2.0))
                     .sqrt();
-                    let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
-                    let height = (WINDOW_H as f32 / (corrected_distance + HEIGHT_ADJUSTMENT)) as u32;
                     // Just using x for now, poc
                     let u = ray_x - ray_x_floor;
-                    draw_line_textured(&mut buffer, height, c, &wall_texture, u, distance);
+                    draw_line_textured(&mut buffer, c, &wall_texture, u, distance);
                     break;
                 }
 
@@ -390,7 +387,12 @@ fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
 }
 
 /// Includes light calculation
-fn draw_line_textured(buffer: &mut Buffer2D, h: u32, c: usize, texture: &Texture, u: f32, distance: f32) {
+#[inline(always)]
+fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32, distance: f32) {
+    let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
+    let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
+    let h = (WINDOW_H as f32 / (corrected_distance + HEIGHT_ADJUSTMENT)) as u32;
+    
     let h_bounded = h.min(WINDOW_H as u32);
     let offset = (WINDOW_H - h_bounded as usize) / 2;
     let mut color: u32 = 0;
