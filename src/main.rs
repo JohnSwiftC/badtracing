@@ -144,6 +144,40 @@ impl Skybox {
     }
 }
 
+struct Texture {
+    image: DynamicImage,
+    width: u32,
+    height: u32,
+}
+
+impl Texture {
+    fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
+        let image = image::open(path)?;
+        let (width, height) = image.dimensions();
+        
+        Ok(Texture {
+            image,
+            width,
+            height,
+        })
+    }
+
+    fn get_pixel_uv(&self, u: f32, v: f32) -> u32 {
+        // U is relative to x, v is relative to y here
+        // I'm using uv because a size of a wall is 1, so we can easily calculate uv with a ray position and wall corner position
+
+        let x = (u * self.width as f32).floor() as u32;
+        let y = (v * self.height as f32).floor() as u32;
+
+        // Also, I know that I only need to draw columns so this can be heavily optimized but just poc for now
+
+        let pixel = self.image.get_pixel(x, y);
+
+        from_u8_rgb(pixel[0], pixel[1], pixel[2])
+
+    }
+}
+
 enum WorldObject {
     BrickWall,
     RedWall,
@@ -169,6 +203,7 @@ fn main() {
     ];
     
     let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
+    let wall_texture = Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
     
     // Floor is a static gradient, calculating it only once adds a little performance
     let mut floor = Buffer2D::new(WINDOW_H, WINDOW_W);
@@ -225,13 +260,18 @@ fn main() {
                 && ray_y <= map.len() as f32 - 1.0
                 && ray_y >= 0.0
             {
-                if map[ray_y.floor() as usize][ray_x.floor() as usize] == 1 {
+                let (ray_x_floor, ray_y_floor) = (ray_x.floor(), ray_y.floor());
+
+
+                if map[ray_y_floor as usize][ray_x_floor as usize] == 1 {
                     let distance = ((ray_x - player.position.x).powf(2.0)
                         + (ray_y - player.position.y).powf(2.0))
                     .sqrt();
                     let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
                     let height = (WINDOW_H as f32 / (corrected_distance + HEIGHT_ADJUSTMENT)) as u32;
-                    draw_line(&mut buffer, height.min(WINDOW_H as u32), c, decrease_brightness(red, ((distance + 2.0) * (distance + 2.0) * SHADOW_ADJUSTMENT) as u32));
+                    // Just using x for now, poc
+                    let u = ray_x - ray_x_floor;
+                    draw_line_textured(&mut buffer, height, c, &wall_texture, u, distance);
                     break;
                 }
 
@@ -346,5 +386,21 @@ fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
     let offset = (WINDOW_H - h as usize) / 2;
     for i in offset..offset + h as usize {
         buffer.0[c][i] = color;
+    }
+}
+
+/// Includes light calculation
+fn draw_line_textured(buffer: &mut Buffer2D, h: u32, c: usize, texture: &Texture, u: f32, distance: f32) {
+    let h_bounded = h.min(WINDOW_H as u32);
+    let offset = (WINDOW_H - h_bounded as usize) / 2;
+    let mut color: u32 = 0;
+
+    // Going to step for every v for each pixel being drawn
+    let v_step: f32 = 1.0 / h as f32;
+    let mut v: f32 = 0.0;
+    for i in offset..offset + h_bounded as usize {
+        color = texture.get_pixel_uv(u, v);
+        buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * SHADOW_ADJUSTMENT) as u32);
+        v += v_step;
     }
 }
