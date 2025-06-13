@@ -195,11 +195,15 @@ fn main() {
     let mut screen_buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
 
     let map: Vec<Vec<u8>> = vec![
-        vec![0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
-        vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        vec![0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-        vec![0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+        vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        vec![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+        vec![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+        vec![1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1],
+        vec![1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1],
+        vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        
     ];
     
     let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
@@ -266,7 +270,8 @@ fn main() {
                     let distance = ((ray_x - player.position.x).powf(2.0)
                         + (ray_y - player.position.y).powf(2.0))
                     .sqrt();
-                    // Just using x for now, poc
+                    // Determine the proper u for the texturing, the way i'm doing this is a little jank
+                    // but whatever #proof of concept
                     let u = ray_x - ray_x_floor;
                     draw_line_textured(&mut buffer, c, &wall_texture, u, distance, screen_x);
                     break;
@@ -387,6 +392,9 @@ fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
 }
 
 /// Includes light calculation
+/// Also, the large number of seemingly arbitrary parameters are passed to stop
+/// recalculations, the inline should stop arg passing from being a bottleneck
+/// definetely a sign to refactor later
 #[inline(always)]
 fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32, distance: f32, screen_x: f32) {
     let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
