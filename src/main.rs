@@ -268,7 +268,7 @@ fn main() {
                     .sqrt();
                     // Just using x for now, poc
                     let u = ray_x - ray_x_floor;
-                    draw_line_textured(&mut buffer, c, &wall_texture, u, distance);
+                    draw_line_textured(&mut buffer, c, &wall_texture, u, distance, screen_x);
                     break;
                 }
 
@@ -388,8 +388,7 @@ fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
 
 /// Includes light calculation
 #[inline(always)]
-fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32, distance: f32) {
-    let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
+fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32, distance: f32, screen_x: f32) {
     let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
     let h = (WINDOW_H as f32 / (corrected_distance + HEIGHT_ADJUSTMENT)) as u32;
     
