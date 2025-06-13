@@ -272,8 +272,18 @@ fn main() {
                     .sqrt();
                     // Determine the proper u for the texturing, the way i'm doing this is a little jank
                     // but whatever #proof of concept
-                    let u = ray_x - ray_x_floor;
-                    draw_line_textured(&mut buffer, c, &wall_texture, u, distance, screen_x);
+                    let u = || {
+                        let ray_x_u = ray_x - ray_x_floor;
+                        let ray_y_u = ray_y - ray_y_floor;
+
+                        if ray_x_u < 1.0 / RAY_FINENESS || ray_x_u > (1.0 - 1.0 / RAY_FINENESS) {
+                            return ray_y_u;
+                        }
+
+                        ray_x_u
+                    };
+                    
+                    draw_line_textured(&mut buffer, c, &wall_texture, u(), distance, screen_x);
                     break;
                 }
 
