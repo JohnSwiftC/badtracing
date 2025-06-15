@@ -30,6 +30,10 @@ impl Canvas {
         self.window.update_with_buffer(&self.screen_buffer, self.width, self.height);
         self.buffer.flush();
     }
+
+    pub fn is_key_down(&self, key: Key) -> bool {
+        self.window.is_key_down(key)
+    }
 }
 
 struct Position {
@@ -92,12 +96,12 @@ impl Camera {
     }
 
     /// Updates absolute angle
-    fn set_angle(&mut self, theta: f32) {
+    pub fn set_angle(&mut self, theta: f32) {
         self.view_angle = theta;
     }
 
     /// Updates relative angle
-    fn update_angle(&mut self, theta: f32) {
+    pub fn update_angle(&mut self, theta: f32) {
         self.view_angle += theta;
     }
 

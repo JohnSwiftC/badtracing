@@ -149,14 +149,14 @@ fn main() {
         // Render walls
         
 
-        /* cant believe this works, adding input checks
+        // cant believe this works, adding input checks
 
         if window.is_key_down(Key::Right) {
-            player.update_angle(LOOK_SENSE);
+            camera.update_angle(LOOK_SENSE);
         }
 
         if window.is_key_down(Key::Left) {
-            player.update_angle(-1.0 * LOOK_SENSE);
+            camera.update_angle(-1.0 * LOOK_SENSE);
         }
 
         // Add all movements together THEN apply
@@ -164,27 +164,26 @@ fn main() {
         let mut ny = 0.0;
 
         if window.is_key_down(Key::W) {
-            nx += player.view_angle.cos() * PLAYER_VELOCITY;
-            ny += player.view_angle.sin() * PLAYER_VELOCITY;
+            nx += camera.view_angle.cos() * PLAYER_VELOCITY;
+            ny += camera.view_angle.sin() * PLAYER_VELOCITY;
         }
 
         if window.is_key_down(Key::S) {
-            nx += -1.0 * player.view_angle.cos() * PLAYER_VELOCITY;
-            ny += -1.0 * player.view_angle.sin() * PLAYER_VELOCITY;
+            nx += -1.0 * camera.view_angle.cos() * PLAYER_VELOCITY;
+            ny += -1.0 * camera.view_angle.sin() * PLAYER_VELOCITY;
         }
 
         if window.is_key_down(Key::A) {
-            nx += player.view_angle.sin() * PLAYER_VELOCITY;
-            ny += -1.0 * player.view_angle.cos() * PLAYER_VELOCITY;
+            nx += camera.view_angle.sin() * PLAYER_VELOCITY;
+            ny += -1.0 * camera.view_angle.cos() * PLAYER_VELOCITY;
         }
 
         if window.is_key_down(Key::D) {
-            nx += -1.0 * player.view_angle.sin() * PLAYER_VELOCITY;
-            ny += player.view_angle.cos() * PLAYER_VELOCITY;
+            nx += -1.0 * camera.view_angle.sin() * PLAYER_VELOCITY;
+            ny += camera.view_angle.cos() * PLAYER_VELOCITY;
         }
 
         player.update_position_checked(nx, ny, &map);
-        */
     }
 }
 
