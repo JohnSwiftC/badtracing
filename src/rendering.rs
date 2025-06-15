@@ -121,7 +121,7 @@ impl Camera {
             {
                 let (ray_x_floor, ray_y_floor) = (ray_x.floor(), ray_y.floor());
 
-                if map[ray_y_floor as usize][ray_x_floor as usize] != 1 {
+                if map[ray_y_floor as usize][ray_x_floor as usize] != 0 {
                     let distance = ((ray_x - self.position.x).powf(2.0)
                         + (ray_y - self.position.y).powf(2.0))
                     .sqrt();

@@ -112,7 +112,8 @@ fn main() {
     // New stuff
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
-    let camera = rendering::Camera::new(FOCAL_DISTANCE, VIEWPORT_SIZE, RAY_FINENESS);
+    let mut camera = rendering::Camera::new(FOCAL_DISTANCE, VIEWPORT_SIZE, RAY_FINENESS);
+    camera.set_position(4.0, 4.0);
     // Main loop
     loop {
 
