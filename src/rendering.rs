@@ -138,6 +138,57 @@ impl Camera {
     }
 }
 
+enum TextureOption {
+    Image(DynamicImage),
+    Color(u32),
+}
+
+pub struct Texture {
+    image: TextureOption,
+    width: u32,
+    height: u32,
+}
+
+impl Texture {
+    pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
+        let image = image::open(path)?;
+        let (width, height) = image.dimensions();
+        
+        Ok(Self {
+            image: TextureOption::Image(image),
+            width,
+            height,
+        })
+    }
+
+    pub fn from_color(color: u32) -> Self {
+        Self {
+            image: TextureOption::Color(color),
+            width: 1,
+            height: 1,
+        }
+    }
+
+    fn get_pixel_uv(&self, u: f32, v: f32) -> u32 {
+        // U is relative to x, v is relative to y here
+        // I'm using uv because a size of a wall is 1, so we can easily calculate uv with a ray position and wall corner position
+
+        if let TextureOption::Color(c) = self.image {
+            return c;
+        }
+
+        let x = (u * self.width as f32).floor() as u32;
+        let y = (v * self.height as f32).floor() as u32;
+
+        // Also, I know that I only need to draw columns so this can be heavily optimized but just poc for now
+
+        let pixel = self.image.get_pixel(x, y);
+
+        from_u8_rgb(pixel[0], pixel[1], pixel[2])
+
+    }
+}
+
 pub struct Buffer2D(Vec<Vec<u32>>);
 
 impl Buffer2D {
