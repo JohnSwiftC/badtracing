@@ -15,70 +15,6 @@ const SHADOW_ADJUSTMENT: f32 = 5.0; // Scales distance to the amount of brightne
 const PLAYER_VELOCITY: f32 = 0.04; // Scales the movement amount determined by the sin and cosine
 const LOOK_SENSE: f32 = 0.02; // Speed of rotation with arrow keys
 
-struct Player {
-    position: Position,
-    view_angle: f32, // Principal axis is facing right, deviation is in radians.
-}
-
-impl Player {
-    fn new() -> Self {
-        Self {
-            position: Position { x: 0.0, y: 0.0 },
-            view_angle: 0.0,
-        }
-    }
-
-    /// Updates absolute position
-    fn set_position(&mut self, x: f32, y: f32) {
-        self.position.x = x;
-        self.position.y = y;
-    }
-
-    /// Updates relative position
-    fn update_position(&mut self, x: f32, y: f32) {
-        self.position.x += x;
-        self.position.y += y;
-    }
-
-    /// Updates relative position with collision detection
-    fn update_position_checked(&mut self, x: f32, y: f32, map: &Vec<Vec<u8>>) {
-        let new_x = self.position.x + x;
-        let new_y = self.position.y + y;
-
-        if map[new_y.floor() as usize][self.position.x.floor() as usize] == 1 {
-            self.position.x = new_x;
-            return;
-        }
-
-        if map[self.position.y.floor() as usize][new_x.floor() as usize] == 1 {
-            self.position.y = new_y;
-            return;
-        }
-
-        if map[new_y.floor() as usize][new_x.floor() as usize] == 1 {
-            return;
-        }
-
-        self.position.x = new_x;
-        self.position.y = new_y;
-    }
-
-    /// Updates absolute angle
-    fn set_angle(&mut self, theta: f32) {
-        self.view_angle = theta;
-    }
-
-    /// Updates relative angle
-    fn update_angle(&mut self, theta: f32) {
-        self.view_angle += theta;
-    }
-}
-
-struct Position {
-    x: f32,
-    y: f32, // this is a 2d x,y coordinate plane
-}
-
 /// Buffer with an x, y coordinate system that allows for easy, specific updates.
 /// Includes a method to convert to normal screen buffer
 struct Buffer2D(Vec<Vec<u32>>);
@@ -147,57 +83,10 @@ impl Skybox {
 }
 
 
-struct Texture {
-    image: DynamicImage,
-    width: u32,
-    height: u32,
-}
-
-impl Texture {
-    fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
-        let image = image::open(path)?;
-        let (width, height) = image.dimensions();
-        
-        Ok(Texture {
-            image,
-            width,
-            height,
-        })
-    }
-
-    fn get_pixel_uv(&self, u: f32, v: f32) -> u32 {
-        // U is relative to x, v is relative to y here
-        // I'm using uv because a size of a wall is 1, so we can easily calculate uv with a ray position and wall corner position
-
-        let x = (u * self.width as f32).floor() as u32;
-        let y = (v * self.height as f32).floor() as u32;
-
-        // Also, I know that I only need to draw columns so this can be heavily optimized but just poc for now
-
-        let pixel = self.image.get_pixel(x, y);
-
-        from_u8_rgb(pixel[0], pixel[1], pixel[2])
-
-    }
-}
-
-enum WorldObject {
-    BrickWall,
-    RedWall,
-}
 
 fn main() {
-    let red = from_u8_rgb(255, 0, 0);
-    let blue = from_u8_rgb(0, 0, 255);
-
-    let mut window = Window::new("badtracing", WINDOW_W, WINDOW_H, WindowOptions::default())
-        .expect("Window failed to open.");
-    window.set_target_fps(FPS);
-
-    let mut buffer = Buffer2D::new(WINDOW_H, WINDOW_W);
-    let mut screen_buffer = vec![BACKGROUND_COLOR; WINDOW_H * WINDOW_W];
-
-    let map: Vec<Vec<u8>> = vec![
+    
+    let map: Vec<Vec<usize>> = vec![
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         vec![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
@@ -210,98 +99,56 @@ fn main() {
     ];
     
     let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
-    let wall_texture = Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
+    let wall_texture = rendering::Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
     
     // Floor is a static gradient, calculating it only once adds a little performance
-    let mut floor = Buffer2D::new(WINDOW_H, WINDOW_W);
-    for i in 0..floor.0.len() {
-        for k in (floor.0[0].len() / 2)..floor.0[0].len() {
-            floor.0[i][k] = decrease_brightness(blue, floor.0[0].len() as u32 - k as u32);
-        }
-    }
+    //let mut floor = Buffer2D::new(WINDOW_H, WINDOW_W);
+    //for i in 0..floor.0.len() {
+    //    for k in (floor.0[0].len() / 2)..floor.0[0].len() {
+    //        floor.0[i][k] = decrease_brightness(blue, floor.0[0].len() as u32 - k as u32);
+    //    }
+    //}
 
+    // New stuff
 
-    let mut player = Player::new();
-    player.set_position(5.0, 3.0);
-
+    let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
+    let camera = rendering::Camera::new(FOCAL_DISTANCE, VIEWPORT_SIZE, RAY_FINENESS);
     // Main loop
     loop {
 
-        // draw stupid ass skybox
+        camera.raycast_map(&mut canvas, &map, &[&wall_texture]);
+        canvas.update();
+
+        /* draw stupid ass skybox
         for x in 0..WINDOW_W {
                 
             let screen_x = (x as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
             let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE).atan();
                 
-           // Render skybox for upper half of screen
+           Render skybox for upper half of screen
             for y in 0..(WINDOW_H / 2) {
                 let vertical_ratio = y as f32 / (WINDOW_H / 2) as f32;
                 let color = skybox.get_pixel(ray_angle, vertical_ratio);
                 buffer.0[x][y] = color;
             }
         }
+            */
 
         // Add floor with goofy effect
         // Now just pulls from floor buffer2d to save time
+        
+        /*
         for i in 0..buffer.0.len() {
             for k in (buffer.0[0].len() / 2)..buffer.0[0].len() {
                 buffer.0[i][k] = floor.0[i][k];
             }
         }
+        */
 
         // Render walls
-        for c in 0..WINDOW_W {
-            // Calculate ray angle for this column
-            let screen_x = (c as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
-            let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE).atan();
+        
 
-            // Ray direction
-            let dx = ray_angle.cos() / RAY_FINENESS;
-            let dy = ray_angle.sin() / RAY_FINENESS;
-
-            let mut ray_x = player.position.x;
-            let mut ray_y = player.position.y;
-
-            while ray_x <= map[0].len() as f32 - 1.0
-                && ray_x >= 0.0
-                && ray_y <= map.len() as f32 - 1.0
-                && ray_y >= 0.0
-            {
-                let (ray_x_floor, ray_y_floor) = (ray_x.floor(), ray_y.floor());
-
-                if map[ray_y_floor as usize][ray_x_floor as usize] == 1 {
-                    let distance = ((ray_x - player.position.x).powf(2.0)
-                        + (ray_y - player.position.y).powf(2.0))
-                    .sqrt();
-                    // Determine the proper u for the texturing, the way i'm doing this is a little jank
-                    // but whatever #proof of concept
-                    let u = || {
-                        let ray_x_u = ray_x - ray_x_floor;
-                        let ray_y_u = ray_y - ray_y_floor;
-
-                        if ray_x_u < 1.0 / RAY_FINENESS || ray_x_u > (1.0 - 1.0 / RAY_FINENESS) {
-                            return ray_y_u;
-                        }
-
-                        ray_x_u
-                    };
-                    
-                    draw_line_textured(&mut buffer, c, &wall_texture, u(), distance, screen_x);
-                    break;
-                }
-
-                ray_x += dx;
-                ray_y += dy;
-            }
-        }
-
-        buffer.to_screen(&mut screen_buffer);
-        window
-            .update_with_buffer(&screen_buffer, WINDOW_W, WINDOW_H)
-            .expect("Window failed to update");
-        buffer.flush();
-
-        // cant believe this works, adding input checks
+        /* cant believe this works, adding input checks
 
         if window.is_key_down(Key::Right) {
             player.update_angle(LOOK_SENSE);
@@ -336,6 +183,7 @@ fn main() {
         }
 
         player.update_position_checked(nx, ny, &map);
+        */
     }
 }
 
@@ -404,10 +252,11 @@ fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
     }
 }
 
-/// Includes light calculation
-/// Also, the large number of seemingly arbitrary parameters are passed to stop
-/// recalculations, the inline should stop arg passing from being a bottleneck
-/// definetely a sign to refactor later
+// Includes light calculation
+// Also, the large number of seemingly arbitrary parameters are passed to stop
+// recalculations, the inline should stop arg passing from being a bottleneck
+// definetely a sign to refactor later
+/*
 #[inline(always)]
 fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32, distance: f32, screen_x: f32) {
     let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
@@ -426,3 +275,4 @@ fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32
         v += v_step;
     }
 }
+*/

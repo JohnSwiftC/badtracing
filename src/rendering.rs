@@ -9,6 +9,7 @@ pub struct Canvas {
     buffer: Buffer2D,
     pub width: usize,
     pub height: usize,
+    screen_buffer: Vec<u32>,
 }
 
 impl Canvas {
@@ -19,8 +20,15 @@ impl Canvas {
                 buffer: Buffer2D::new(height, width),
                 width,
                 height,
+                screen_buffer: vec![0; width * height],
             }
         )
+    }
+
+    pub fn update(&mut self) {
+        self.buffer.to_screen(&mut self.screen_buffer);
+        self.window.update_with_buffer(&self.screen_buffer, self.width, self.height);
+        self.buffer.flush();
     }
 }
 
@@ -38,7 +46,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    fn new(fd: f32, vs: f32, rf: f32) -> Self {
+    pub fn new(fd: f32, vs: f32, rf: f32) -> Self {
         Self {
             position: Position { x: 0.0, y: 0.0 },
             view_angle: 0.0,
@@ -49,19 +57,19 @@ impl Camera {
     }
 
     /// Updates absolute position
-    fn set_position(&mut self, x: f32, y: f32) {
+    pub fn set_position(&mut self, x: f32, y: f32) {
         self.position.x = x;
         self.position.y = y;
     }
 
     /// Updates relative position
-    fn update_position(&mut self, x: f32, y: f32) {
+    pub fn update_position(&mut self, x: f32, y: f32) {
         self.position.x += x;
         self.position.y += y;
     }
 
     /// Updates relative position with collision detection
-    fn update_position_checked(&mut self, x: f32, y: f32, map: &Vec<Vec<u8>>) {
+    pub fn update_position_checked(&mut self, x: f32, y: f32, map: &Vec<Vec<usize>>) {
         let new_x = self.position.x + x;
         let new_y = self.position.y + y;
 
@@ -93,7 +101,7 @@ impl Camera {
         self.view_angle += theta;
     }
 
-    fn raycast_map(&self, canvas: &mut Canvas, map: &Vec<Vec<usize>>, textures: &[&Texture]) {
+    pub fn raycast_map(&self, canvas: &mut Canvas, map: &Vec<Vec<usize>>, textures: &[&Texture]) {
         for c in 0..canvas.width {
             // Calculate ray angle for this column
             let screen_x = (c as f32 / canvas.width as f32 - 0.5) * self.viewport_size;
@@ -113,7 +121,7 @@ impl Camera {
             {
                 let (ray_x_floor, ray_y_floor) = (ray_x.floor(), ray_y.floor());
 
-                if map[ray_y_floor as usize][ray_x_floor as usize] == 1 {
+                if map[ray_y_floor as usize][ray_x_floor as usize] != 1 {
                     let distance = ((ray_x - self.position.x).powf(2.0)
                         + (ray_y - self.position.y).powf(2.0))
                     .sqrt();
@@ -141,7 +149,7 @@ impl Camera {
                     let v_step: f32 = 1.0 / h as f32;
                     let mut v: f32 = 0.0;
                     for i in offset..offset + h_bounded as usize {
-                        color = textures[map[ray_y_floor as usize][ray_x_floor as usize]].get_pixel_uv(u, v);
+                        color = textures[map[ray_y_floor as usize][ray_x_floor as usize] - 1].get_pixel_uv(u, v);
                         canvas.buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * 5.0) as u32); // 5.0 is the shadow adjustment
                         v += v_step;
                     }
