@@ -1,8 +1,6 @@
 use minifb::{Window, WindowOptions, Key};
 use image::{GenericImageView, DynamicImage};
 
-mod engine;
-
 const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 700;
 const FPS: usize = 60;
@@ -77,11 +75,6 @@ impl Player {
 struct Position {
     x: f32,
     y: f32, // this is a 2d x,y coordinate plane
-}
-
-// Trait used to write things to be rendered to the screen
-trait Renderable {
-    fn render(buffer: &mut Buffer2D);
 }
 
 /// Buffer with an x, y coordinate system that allows for easy, specific updates.
@@ -185,15 +178,9 @@ impl Texture {
     }
 }
 
-struct MapObject<'a> {
-    texture: &'a Texture,
-}
-
-struct GameMonolith<'a, T> {
-    window: Window,
-    screen_buffer: Buffer2D,
-    player: T,
-    map: Vec<Vec<MapObject<'a>>>,
+enum WorldObject {
+    BrickWall,
+    RedWall,
 }
 
 fn main() {
