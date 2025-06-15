@@ -43,7 +43,7 @@ struct Position {
 
 pub struct Camera {
     position: Position,
-    view_angle: f32, // Principal axis is facing right, deviation is in radians.
+    pub view_angle: f32, // Principal axis is facing right, deviation is in radians.
     focal_distance: f32,
     viewport_size: f32,
     ray_fineness: f32,

@@ -151,11 +151,11 @@ fn main() {
 
         // cant believe this works, adding input checks
 
-        if window.is_key_down(Key::Right) {
+        if canvas.is_key_down(Key::Right) {
             camera.update_angle(LOOK_SENSE);
         }
 
-        if window.is_key_down(Key::Left) {
+        if canvas.is_key_down(Key::Left) {
             camera.update_angle(-1.0 * LOOK_SENSE);
         }
 
@@ -163,27 +163,27 @@ fn main() {
         let mut nx = 0.0;
         let mut ny = 0.0;
 
-        if window.is_key_down(Key::W) {
+        if canvas.is_key_down(Key::W) {
             nx += camera.view_angle.cos() * PLAYER_VELOCITY;
             ny += camera.view_angle.sin() * PLAYER_VELOCITY;
         }
 
-        if window.is_key_down(Key::S) {
+        if canvas.is_key_down(Key::S) {
             nx += -1.0 * camera.view_angle.cos() * PLAYER_VELOCITY;
             ny += -1.0 * camera.view_angle.sin() * PLAYER_VELOCITY;
         }
 
-        if window.is_key_down(Key::A) {
+        if canvas.is_key_down(Key::A) {
             nx += camera.view_angle.sin() * PLAYER_VELOCITY;
             ny += -1.0 * camera.view_angle.cos() * PLAYER_VELOCITY;
         }
 
-        if window.is_key_down(Key::D) {
+        if canvas.is_key_down(Key::D) {
             nx += -1.0 * camera.view_angle.sin() * PLAYER_VELOCITY;
             ny += camera.view_angle.cos() * PLAYER_VELOCITY;
         }
 
-        player.update_position_checked(nx, ny, &map);
+        camera.update_position_checked(nx, ny, &map);
     }
 }
 
