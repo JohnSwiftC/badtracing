@@ -66,29 +66,10 @@ impl<'a> GameMonolith<'a> {
             post_render: Vec::new(),
         })
     }
-
-    /// Makes writing maps easy, allows values 1 - n to be mapped to a texture from 0 - n-1
-    /// Which are then rendered as textured walls
-    pub fn add_map_from_usize(&mut self, map: Vec<Vec<usize>>, textures: &[&'a Texture]) {
-        let mut new_map: Vec<Vec<MapObject<'a>>> = vec![vec![MapObject::None; map[0].len()]; map.len()];
-        // Common theme, manually iterating over this to hold the index
-        // even if it doesn't look good
-        for i in 0..map.len() {
-            for k in 0..map[0].len() {
-                if map[i][k] > 0 {
-                    new_map[i][k] = MapObject::TexturedWall(textures[map[i][k] - 1]);
-                }
-            }
-        }
-
-        self.map = Some(new_map);
-    }
 }
 
-#[derive(Clone)]
-enum MapObject<'a> {
-    TexturedWall(&'a Texture),
-    None,
+struct MapObject<'a> {
+    texture: &'a Texture,
 }
 
 enum TextureOption {
