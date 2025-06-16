@@ -3,7 +3,7 @@ use image::{GenericImageView, DynamicImage};
 
 mod rendering;
 
-const WINDOW_W: usize = 1000;
+const WINDOW_W: usize = 700;
 const WINDOW_H: usize = 700;
 const FPS: usize = 60;
 const FOCAL_DISTANCE: f32 = WINDOW_H as f32 / WINDOW_W as f32;
@@ -114,6 +114,7 @@ fn main() {
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
     let mut camera = rendering::Camera::new(FOCAL_DISTANCE, VIEWPORT_SIZE, RAY_FINENESS);
     camera.set_position(4.0, 4.0);
+    canvas.set_target_fps(60);
     // Main loop
     loop {
 

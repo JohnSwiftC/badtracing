@@ -34,6 +34,10 @@ impl Canvas {
     pub fn is_key_down(&self, key: Key) -> bool {
         self.window.is_key_down(key)
     }
+
+    pub fn set_target_fps(&mut self, fps: usize) {
+        self.window.set_target_fps(fps);
+    }
 }
 
 struct Position {
@@ -77,22 +81,19 @@ impl Camera {
         let new_x = self.position.x + x;
         let new_y = self.position.y + y;
 
-        if map[new_y.floor() as usize][self.position.x.floor() as usize] == 1 {
+        if map[new_y.floor() as usize][new_x.floor() as usize] == 0 {
             self.position.x = new_x;
-            return;
-        }
-
-        if map[self.position.y.floor() as usize][new_x.floor() as usize] == 1 {
             self.position.y = new_y;
             return;
         }
 
-        if map[new_y.floor() as usize][new_x.floor() as usize] == 1 {
-            return;
+        if map[new_y.floor() as usize][self.position.x.floor() as usize] == 0 {
+            self.position.y = new_y;
         }
 
-        self.position.x = new_x;
-        self.position.y = new_y;
+        if map[self.position.y.floor() as usize][new_x.floor() as usize] == 0 {
+            self.position.x = new_x;
+        }
     }
 
     /// Updates absolute angle
@@ -154,7 +155,7 @@ impl Camera {
                     let mut v: f32 = 0.0;
                     for i in offset..offset + h_bounded as usize {
                         color = textures[map[ray_y_floor as usize][ray_x_floor as usize] - 1].get_pixel_uv(u, v);
-                        canvas.buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * 5.0) as u32); // 5.0 is the shadow adjustment
+                        canvas.buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * 2.5) as u32); // 2.5 is the shadow adjustment
                         v += v_step;
                     }
                     break;
