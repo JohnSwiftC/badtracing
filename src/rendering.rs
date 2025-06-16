@@ -153,6 +153,13 @@ impl Camera {
                     // Going to step for every v for each pixel being drawn
                     let v_step: f32 = 1.0 / h as f32;
                     let mut v: f32 = 0.0;
+
+                    // Check to see if player is too close to see the very top
+                    if h > h_bounded {
+                        let d = (h - h_bounded) / 2;
+                        v = d as f32 / h as f32;
+                    }
+
                     for i in offset..offset + h_bounded as usize {
                         color = textures[map[ray_y_floor as usize][ray_x_floor as usize] - 1].get_pixel_uv(u, v);
                         canvas.buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * 2.5) as u32); // 2.5 is the shadow adjustment
