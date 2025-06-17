@@ -43,17 +43,6 @@ fn main() {
         camera.raycast_map(&mut canvas, &map, &[&wall_texture]);
         canvas.update();
 
-        // Add floor with goofy effect
-        // Now just pulls from floor buffer2d to save time
-        
-        /*
-        for i in 0..buffer.0.len() {
-            for k in (buffer.0[0].len() / 2)..buffer.0[0].len() {
-                buffer.0[i][k] = floor.0[i][k];
-            }
-        }
-        */
-
         if canvas.is_key_down(Key::Right) {
             camera.update_angle(LOOK_SENSE);
         }
@@ -143,28 +132,3 @@ fn increase_brightness(color: u32, amount: u32) -> u32 {
 
     (r << 16) | (g << 8) | b
 }
-
-// Includes light calculation
-// Also, the large number of seemingly arbitrary parameters are passed to stop
-// recalculations, the inline should stop arg passing from being a bottleneck
-// definetely a sign to refactor later
-/*
-#[inline(always)]
-fn draw_line_textured(buffer: &mut Buffer2D, c: usize, texture: &Texture, u: f32, distance: f32, screen_x: f32) {
-    let corrected_distance = distance * (screen_x / FOCAL_DISTANCE as f32).cos();
-    let h = (WINDOW_H as f32 / (corrected_distance + HEIGHT_ADJUSTMENT)) as u32;
-    
-    let h_bounded = h.min(WINDOW_H as u32);
-    let offset = (WINDOW_H - h_bounded as usize) / 2;
-    let mut color: u32 = 0;
-
-    // Going to step for every v for each pixel being drawn
-    let v_step: f32 = 1.0 / h as f32;
-    let mut v: f32 = 0.0;
-    for i in offset..offset + h_bounded as usize {
-        color = texture.get_pixel_uv(u, v);
-        buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * SHADOW_ADJUSTMENT) as u32);
-        v += v_step;
-    }
-}
-*/
