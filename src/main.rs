@@ -30,16 +30,7 @@ fn main() {
     
     let skybox = rendering::Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
     let wall_texture = rendering::Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
-    
-    // Floor is a static gradient, calculating it only once adds a little performance
-    //let mut floor = Buffer2D::new(WINDOW_H, WINDOW_W);
-    //for i in 0..floor.0.len() {
-    //    for k in (floor.0[0].len() / 2)..floor.0[0].len() {
-    //        floor.0[i][k] = decrease_brightness(blue, floor.0[0].len() as u32 - k as u32);
-    //    }
-    //}
-
-    // New stuff
+    let floor_color = from_u8_rgb(0, 0, 255);
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
     let mut camera = rendering::Camera::new(FOCAL_DISTANCE, VIEWPORT_SIZE, RAY_FINENESS);
@@ -48,6 +39,7 @@ fn main() {
     // Main loop
     loop {
 
+        camera.draw_simple_floor(&mut canvas, floor_color);
         camera.draw_skybox(&mut canvas, &skybox);
         camera.raycast_map(&mut canvas, &map, &[&wall_texture]);
         canvas.update();

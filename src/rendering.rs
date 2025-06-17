@@ -155,6 +155,14 @@ impl Camera {
         }
     }
 
+    pub fn draw_simple_floor(&mut self, canvas: &mut Canvas, color: u32) {
+        for i in 0..canvas.width {
+            for k in (canvas.height / 2)..canvas.height {
+                canvas.buffer.0[i][k] = decrease_brightness(color, canvas.height as u32 - k as u32);
+            }
+        }
+    }
+
     pub fn raycast_map(&self, canvas: &mut Canvas, map: &Vec<Vec<usize>>, textures: &[&Texture]) {
         for c in 0..canvas.width {
             // Calculate ray angle for this column
