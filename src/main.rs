@@ -45,45 +45,6 @@ impl Buffer2D {
     }
 }
 
-use std::path::Path;
-
-struct Skybox {
-    image: DynamicImage,
-    width: u32,
-    height: u32,
-}
-
-impl Skybox {
-    
-    fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
-        let image = image::open(path)?;
-        let (width, height) = image.dimensions();
-        
-        Ok(Skybox {
-            image,
-            width,
-            height,
-        })
-    }
-    
-    // Get pixel color from skybox based on viewing angle and vertical position
-    fn get_pixel(&self, angle: f32, vertical_ratio: f32) -> u32 {
-    
-        let two_pi = 2.0 * std::f32::consts::PI;
-        let normalized_angle = (angle % (two_pi) + two_pi) / two_pi;
-        let u = (normalized_angle * self.width as f32) as u32 % self.width;
-        
-        let mut v = ((1.0 - vertical_ratio.clamp(0.0, 1.0)) * self.height as f32) as u32;
-        v = v.min(self.height - 1);
-        
-        let pixel = self.image.get_pixel(u, v);
-        
-        from_u8_rgb(pixel[0], pixel[1], pixel[2])
-    }
-}
-
-
-
 fn main() {
     
     let map: Vec<Vec<usize>> = vec![
@@ -98,7 +59,7 @@ fn main() {
         
     ];
     
-    let skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
+    let skybox = rendering::Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
     let wall_texture = rendering::Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
     
     // Floor is a static gradient, calculating it only once adds a little performance
@@ -118,6 +79,7 @@ fn main() {
     // Main loop
     loop {
 
+        camera.draw_skybox(&mut canvas, &skybox);
         camera.raycast_map(&mut canvas, &map, &[&wall_texture]);
         canvas.update();
 

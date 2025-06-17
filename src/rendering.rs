@@ -40,6 +40,41 @@ impl Canvas {
     }
 }
 
+pub struct Skybox {
+    image: DynamicImage,
+    width: u32,
+    height: u32,
+}
+
+impl Skybox {
+    
+    pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
+        let image = image::open(path)?;
+        let (width, height) = image.dimensions();
+        
+        Ok(Skybox {
+            image,
+            width,
+            height,
+        })
+    }
+    
+    // Get pixel color from skybox based on viewing angle and vertical position
+    pub fn get_pixel(&self, angle: f32, vertical_ratio: f32) -> u32 {
+    
+        let two_pi = 2.0 * std::f32::consts::PI;
+        let normalized_angle = (angle % (two_pi) + two_pi) / two_pi;
+        let u = (normalized_angle * self.width as f32) as u32 % self.width;
+        
+        let mut v = ((1.0 - vertical_ratio.clamp(0.0, 1.0)) * self.height as f32) as u32;
+        v = v.min(self.height - 1);
+        
+        let pixel = self.image.get_pixel(u, v);
+        
+        from_u8_rgb(pixel[0], pixel[1], pixel[2])
+    }
+}
+
 struct Position {
     x: f32,
     y: f32, // this is a 2d x,y coordinate plane
@@ -104,6 +139,20 @@ impl Camera {
     /// Updates relative angle
     pub fn update_angle(&mut self, theta: f32) {
         self.view_angle += theta;
+    }
+
+    pub fn draw_skybox(&mut self, canvas: &mut Canvas, skybox: &Skybox) {
+        for x in 0..canvas.width {
+                
+            let screen_x = (x as f32 / canvas.width as f32 - 0.5) * self.viewport_size;
+            let ray_angle = self.view_angle + (screen_x / self.focal_distance).atan();
+                
+            for y in 0..(canvas.height / 2) {
+                let vertical_ratio = y as f32 / (canvas.height / 2) as f32;
+                let color = skybox.get_pixel(ray_angle, vertical_ratio);
+                canvas.buffer.0[x][y] = color;
+            }
+        }
     }
 
     pub fn raycast_map(&self, canvas: &mut Canvas, map: &Vec<Vec<usize>>, textures: &[&Texture]) {
