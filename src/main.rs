@@ -1,5 +1,4 @@
-use minifb::{Window, WindowOptions, Key};
-use image::{GenericImageView, DynamicImage};
+use minifb::{Key};
 
 mod rendering;
 
@@ -14,36 +13,6 @@ const HEIGHT_ADJUSTMENT: f32 = 0.3; // Higher values lead to lower heights.
 const SHADOW_ADJUSTMENT: f32 = 5.0; // Scales distance to the amount of brightness removed
 const PLAYER_VELOCITY: f32 = 0.04; // Scales the movement amount determined by the sin and cosine
 const LOOK_SENSE: f32 = 0.02; // Speed of rotation with arrow keys
-
-/// Buffer with an x, y coordinate system that allows for easy, specific updates.
-/// Includes a method to convert to normal screen buffer
-struct Buffer2D(Vec<Vec<u32>>);
-
-impl Buffer2D {
-    fn new(height: usize, width: usize) -> Self {
-        Self(vec![vec![BACKGROUND_COLOR; height]; width])
-    }
-
-    /// Does this in-place to an existing screen buffer
-    /// Also hoping that the buffer is the same size as the Buffer2D
-    fn to_screen(&self, buffer: &mut [u32]) {
-        let mut idx = 0;
-        for y in 0..self.0[0].len() {
-            for x in 0..self.0.len() {
-                buffer[idx] = self.0[x][y];
-                idx += 1;
-            }
-        }
-    }
-
-    fn flush(&mut self) {
-        for i in 0..self.0.len() {
-            for k in 0..self.0[0].len() {
-                self.0[i][k] = BACKGROUND_COLOR;
-            }
-        }
-    }
-}
 
 fn main() {
     
@@ -83,21 +52,6 @@ fn main() {
         camera.raycast_map(&mut canvas, &map, &[&wall_texture]);
         canvas.update();
 
-        /* draw stupid ass skybox
-        for x in 0..WINDOW_W {
-                
-            let screen_x = (x as f32 / WINDOW_W as f32 - 0.5) * VIEWPORT_SIZE;
-            let ray_angle = player.view_angle + (screen_x / FOCAL_DISTANCE).atan();
-                
-           Render skybox for upper half of screen
-            for y in 0..(WINDOW_H / 2) {
-                let vertical_ratio = y as f32 / (WINDOW_H / 2) as f32;
-                let color = skybox.get_pixel(ray_angle, vertical_ratio);
-                buffer.0[x][y] = color;
-            }
-        }
-            */
-
         // Add floor with goofy effect
         // Now just pulls from floor buffer2d to save time
         
@@ -108,11 +62,6 @@ fn main() {
             }
         }
         */
-
-        // Render walls
-        
-
-        // cant believe this works, adding input checks
 
         if canvas.is_key_down(Key::Right) {
             camera.update_angle(LOOK_SENSE);
@@ -202,17 +151,6 @@ fn increase_brightness(color: u32, amount: u32) -> u32 {
     }
 
     (r << 16) | (g << 8) | b
-}
-
-fn flush_buffer(buffer: &mut Vec<u32>) {
-    buffer.iter_mut().for_each(|i| *i = BACKGROUND_COLOR);
-}
-
-fn draw_line(buffer: &mut Buffer2D, h: u32, c: usize, color: u32) {
-    let offset = (WINDOW_H - h as usize) / 2;
-    for i in offset..offset + h as usize {
-        buffer.0[c][i] = color;
-    }
 }
 
 // Includes light calculation
