@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use minifb::{Window, WindowOptions, Key};
 use image::{GenericImageView, DynamicImage};
 use std::path::Path;
@@ -27,7 +29,7 @@ impl Canvas {
 
     pub fn update(&mut self) {
         self.buffer.to_screen(&mut self.screen_buffer);
-        self.window.update_with_buffer(&self.screen_buffer, self.width, self.height);
+        let _ = self.window.update_with_buffer(&self.screen_buffer, self.width, self.height);
         self.buffer.flush();
     }
 
@@ -205,7 +207,7 @@ impl Camera {
                     
                     let h_bounded = h.min(canvas.height as u32);
                     let offset = (canvas.height - h_bounded as usize) / 2;
-                    let mut color: u32 = 0;
+                    let mut color: u32;
 
                     // Going to step for every v for each pixel being drawn
                     let v_step: f32 = 1.0 / h as f32;
