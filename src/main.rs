@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use minifb::{Key};
+use minifb::Key;
 
 mod rendering;
 
@@ -14,7 +14,6 @@ const PLAYER_VELOCITY: f32 = 0.04; // Scales the movement amount determined by t
 const LOOK_SENSE: f32 = 0.02; // Speed of rotation with arrow keys
 
 fn main() {
-    
     let map: Vec<Vec<usize>> = vec![
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -24,7 +23,6 @@ fn main() {
         vec![1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1],
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        
     ];
 
     // While the manually implemented functions on camera that act on different
@@ -32,9 +30,10 @@ fn main() {
     // That takes in the camera context as a way to get around this) I don't want to
     // force even more data to be moved around and passed to functions every frame
     // also the engine is bad, its in the name.
-    
+
     let skybox = rendering::Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
-    let wall_texture = rendering::Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
+    let wall_texture =
+        rendering::Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
     let floor_color = from_u8_rgb(0, 0, 255);
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
@@ -43,7 +42,6 @@ fn main() {
     canvas.set_target_fps(FPS);
     // Main loop
     loop {
-
         camera.draw_simple_floor(&mut canvas, floor_color);
         camera.draw_skybox(&mut canvas, &skybox);
         camera.raycast_map(&mut canvas, &map, &[&wall_texture]);

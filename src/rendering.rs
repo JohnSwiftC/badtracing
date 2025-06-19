@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 
-use minifb::{Window, WindowOptions, Key};
-use image::{GenericImageView, DynamicImage};
+pub mod cameraspec;
+
+use image::{DynamicImage, GenericImageView};
+use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
 const RAY_FINENESS: f32 = 100.0;
@@ -16,20 +18,20 @@ pub struct Canvas {
 
 impl Canvas {
     pub fn new(name: &'static str, width: usize, height: usize) -> Result<Self, minifb::Error> {
-        Ok(
-            Self {
-                window: Window::new(name, width, height, WindowOptions::default())?,
-                buffer: Buffer2D::new(height, width),
-                width,
-                height,
-                screen_buffer: vec![0; width * height],
-            }
-        )
+        Ok(Self {
+            window: Window::new(name, width, height, WindowOptions::default())?,
+            buffer: Buffer2D::new(height, width),
+            width,
+            height,
+            screen_buffer: vec![0; width * height],
+        })
     }
 
     pub fn update(&mut self) {
         self.buffer.to_screen(&mut self.screen_buffer);
-        let _ = self.window.update_with_buffer(&self.screen_buffer, self.width, self.height);
+        let _ = self
+            .window
+            .update_with_buffer(&self.screen_buffer, self.width, self.height);
         self.buffer.flush();
     }
 
@@ -49,30 +51,28 @@ pub struct Skybox {
 }
 
 impl Skybox {
-    
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
         let image = image::open(path)?;
         let (width, height) = image.dimensions();
-        
+
         Ok(Skybox {
             image,
             width,
             height,
         })
     }
-    
+
     // Get pixel color from skybox based on viewing angle and vertical position
     pub fn get_pixel(&self, angle: f32, vertical_ratio: f32) -> u32 {
-    
         let two_pi = 2.0 * std::f32::consts::PI;
         let normalized_angle = (angle % (two_pi) + two_pi) / two_pi;
         let u = (normalized_angle * self.width as f32) as u32 % self.width;
-        
+
         let mut v = ((1.0 - vertical_ratio.clamp(0.0, 1.0)) * self.height as f32) as u32;
         v = v.min(self.height - 1);
-        
+
         let pixel = self.image.get_pixel(u, v);
-        
+
         from_u8_rgb(pixel[0], pixel[1], pixel[2])
     }
 }
@@ -145,10 +145,9 @@ impl Camera {
 
     pub fn draw_skybox(&mut self, canvas: &mut Canvas, skybox: &Skybox) {
         for x in 0..canvas.width {
-                
             let screen_x = (x as f32 / canvas.width as f32 - 0.5) * self.viewport_size;
             let ray_angle = self.view_angle + (screen_x / self.focal_distance).atan();
-                
+
             for y in 0..(canvas.height / 2) {
                 let vertical_ratio = y as f32 / (canvas.height / 2) as f32;
                 let color = skybox.get_pixel(ray_angle, vertical_ratio);
@@ -201,10 +200,11 @@ impl Camera {
 
                         ray_x_u
                     })();
-                    
-                    let corrected_distance = distance * (screen_x / self.focal_distance as f32).cos();
+
+                    let corrected_distance =
+                        distance * (screen_x / self.focal_distance as f32).cos();
                     let h = (canvas.height as f32 / corrected_distance) as u32;
-                    
+
                     let h_bounded = h.min(canvas.height as u32);
                     let offset = (canvas.height - h_bounded as usize) / 2;
                     let mut color: u32;
@@ -220,8 +220,12 @@ impl Camera {
                     }
 
                     for i in offset..offset + h_bounded as usize {
-                        color = textures[map[ray_y_floor as usize][ray_x_floor as usize] - 1].get_pixel_uv(u, v);
-                        canvas.buffer.0[c][i] = decrease_brightness(color, ((distance + 2.0) * (distance + 2.0) * 2.5) as u32); // 2.5 is the shadow adjustment
+                        color = textures[map[ray_y_floor as usize][ray_x_floor as usize] - 1]
+                            .get_pixel_uv(u, v);
+                        canvas.buffer.0[c][i] = decrease_brightness(
+                            color,
+                            ((distance + 2.0) * (distance + 2.0) * 2.5) as u32,
+                        ); // 2.5 is the shadow adjustment
                         v += v_step;
                     }
                     break;
@@ -249,7 +253,7 @@ impl Texture {
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn std::error::Error>> {
         let image = image::open(path)?;
         let (width, height) = image.dimensions();
-        
+
         Ok(Self {
             image: TextureOption::Image(image),
             width,
