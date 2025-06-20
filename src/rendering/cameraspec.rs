@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt;
 
-use super::Position;
+use super::{Position, Camera};
 
 #[derive(Debug)]
 struct CameraBuildError {
@@ -17,7 +17,7 @@ impl fmt::Display for CameraBuildError {
         write!(f, "{reason}")
     }
 }
-struct CameraOptions {
+pub struct CameraOptions {
     position: Position,
     view_angle: f32,
     focal_distance: f32,
@@ -65,7 +65,20 @@ impl Into<CameraOptions> for CameraOptionsBuilder {
     }
 }
 
-struct CameraOptionsBuilder {
+impl Into<Camera> for CameraOptions {
+    fn into(self) -> Camera {
+        Camera {
+            position: self.position,
+            view_angle: self.view_angle,
+            focal_distance: self.focal_distance,
+            viewport_size: self.viewport_size,
+            ray_fineness: self.ray_fineness,
+            camera_fog: self.camera_fog,
+        }
+    }
+}
+
+pub struct CameraOptionsBuilder {
     position: Position,
     view_angle: f32,
     focal_distance: f32,
@@ -75,7 +88,7 @@ struct CameraOptionsBuilder {
 }
 
 impl CameraOptionsBuilder {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             position: Position{ x: 0.0, y: 0.0 },
             view_angle: 0.0,
@@ -86,33 +99,33 @@ impl CameraOptionsBuilder {
         }
     }
 
-    fn position(&mut self, position: Position) {
+    pub fn position(&mut self, position: Position) {
         self.position = position;
     }
 
-    fn view_angle(&mut self, view_angle: f32) {
+    pub fn view_angle(&mut self, view_angle: f32) {
         self.view_angle = view_angle;
     }
 
-    fn focal_distance(&mut self, focal_distance: f32) {
+    pub fn focal_distance(&mut self, focal_distance: f32) {
         self.focal_distance = focal_distance;
     }
 
-    fn viewport_size(&mut self, viewport_size: f32) {
+    pub fn viewport_size(&mut self, viewport_size: f32) {
         self.viewport_size = viewport_size;
     }
 
-    fn ray_fineness(&mut self, ray_fineness: f32) {
+    pub fn ray_fineness(&mut self, ray_fineness: f32) {
         self.ray_fineness = ray_fineness;
     }
 
-    fn camera_fog(&mut self, camera_fog: CameraFog) {
+    pub fn camera_fog(&mut self, camera_fog: CameraFog) {
         self.camera_fog = camera_fog;
     }
 
 }
 
-enum CameraFog {
+pub enum CameraFog {
     None,
     VisibleDistance(f32),
 }

@@ -89,6 +89,7 @@ pub struct Camera {
     focal_distance: f32,
     viewport_size: f32,
     ray_fineness: f32,
+    camera_fog: cameraspec::CameraFog,
 }
 
 impl Camera {
@@ -99,6 +100,7 @@ impl Camera {
             focal_distance: fd,
             viewport_size: vs,
             ray_fineness: rf,
+            camera_fog: cameraspec::CameraFog::None,
         }
     }
 
