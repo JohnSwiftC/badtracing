@@ -26,7 +26,7 @@ struct CameraOptions {
     camera_fog: CameraFog,
 }
 
-impl CameraOptions {
+impl Default for CameraOptions {
     fn default() -> Self {
         Self {
             position: Position{ x: 0.0, y: 0.0 },
@@ -42,6 +42,19 @@ impl CameraOptions {
 impl Into<CameraOptionsBuilder> for CameraOptions {
     fn into(self) -> CameraOptionsBuilder {
         CameraOptionsBuilder {
+            position: self.position,
+            view_angle: self.view_angle,
+            focal_distance: self.focal_distance,
+            viewport_size: self.viewport_size,
+            ray_fineness: self.ray_fineness,
+            camera_fog: self.camera_fog,
+        }
+    }
+}
+
+impl Into<CameraOptions> for CameraOptionsBuilder {
+    fn into(self) -> CameraOptions {
+        CameraOptions {
             position: self.position,
             view_angle: self.view_angle,
             focal_distance: self.focal_distance,
