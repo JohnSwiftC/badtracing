@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt;
 
-use super::{Position, Camera};
+use super::{Camera, Position};
 
 #[derive(Debug)]
 struct CameraBuildError {
@@ -29,7 +29,7 @@ pub struct CameraOptions {
 impl Default for CameraOptions {
     fn default() -> Self {
         Self {
-            position: Position{ x: 0.0, y: 0.0 },
+            position: Position { x: 0.0, y: 0.0 },
             view_angle: 0.0,
             focal_distance: 1.0,
             viewport_size: 1.0,
@@ -90,7 +90,7 @@ pub struct CameraOptionsBuilder {
 impl CameraOptionsBuilder {
     pub fn new() -> Self {
         Self {
-            position: Position{ x: 0.0, y: 0.0 },
+            position: Position { x: 0.0, y: 0.0 },
             view_angle: 0.0,
             focal_distance: 1.0,
             viewport_size: 1.0,
@@ -99,33 +99,38 @@ impl CameraOptionsBuilder {
         }
     }
 
-    pub fn position(&mut self, position: Position) {
+    pub fn position(mut self, position: Position) -> Self {
         self.position = position;
+        self
     }
 
-    pub fn view_angle(&mut self, view_angle: f32) {
+    pub fn view_angle(mut self, view_angle: f32) -> Self {
         self.view_angle = view_angle;
+        self
     }
 
-    pub fn focal_distance(&mut self, focal_distance: f32) {
+    pub fn focal_distance(mut self, focal_distance: f32) -> Self {
         self.focal_distance = focal_distance;
+        self
     }
 
-    pub fn viewport_size(&mut self, viewport_size: f32) {
+    pub fn viewport_size(mut self, viewport_size: f32) -> Self {
         self.viewport_size = viewport_size;
+        self
     }
 
-    pub fn ray_fineness(&mut self, ray_fineness: f32) {
+    pub fn ray_fineness(mut self, ray_fineness: f32) -> Self {
         self.ray_fineness = ray_fineness;
+        self
     }
 
-    pub fn camera_fog(&mut self, camera_fog: CameraFog) {
+    pub fn camera_fog(mut self, camera_fog: CameraFog) -> Self {
         self.camera_fog = camera_fog;
+        self
     }
-
 }
 
 pub enum CameraFog {
     None,
-    VisibleDistance(f32),
+    VisibleDistance { fog_dist: f32, fog_color: u32 },
 }

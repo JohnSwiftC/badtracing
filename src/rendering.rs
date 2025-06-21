@@ -187,12 +187,35 @@ impl Camera {
             {
                 let (ray_x_floor, ray_y_floor) = (ray_x.floor(), ray_y.floor());
 
+                // Various height and distance values
+                // TODO: This now runs every single ray step = SLOW, perform some optimizations
+                let distance = ((ray_x - self.position.x).powf(2.0)
+                    + (ray_y - self.position.y).powf(2.0))
+                .sqrt();
+                let corrected_distance = distance * (screen_x / self.focal_distance as f32).cos();
+                let h = (canvas.height as f32 / corrected_distance) as u32;
+                let h_bounded = h.min(canvas.height as u32);
+                let offset = (canvas.height - h_bounded as usize) / 2;
+
+                use cameraspec::CameraFog;
+                match self.camera_fog {
+                    CameraFog::VisibleDistance { fog_dist, fog_color } => {
+                        // Note that these are the scoped values from the enum
+                        if distance > fog_dist {
+                            for i in 0..offset + h_bounded as usize {
+                                canvas.buffer.0[c][i] = fog_color;
+                            }
+
+                            break; // Skip rest of rendering for this column, fog covers it
+                        }
+                    }
+                    CameraFog::None => (),
+                }
+
                 if map[ray_y_floor as usize][ray_x_floor as usize] != 0 {
-                    let distance = ((ray_x - self.position.x).powf(2.0)
-                        + (ray_y - self.position.y).powf(2.0))
-                    .sqrt();
-                    // Determine the proper u for the texturing, the way i'm doing this is a little jank
-                    // but whatever #proof of concept
+                    // Texturing, u and v values found and used
+                    let mut color: u32;
+
                     let u = (|| {
                         let ray_x_u = ray_x - ray_x_floor;
                         let ray_y_u = ray_y - ray_y_floor;
@@ -204,22 +227,24 @@ impl Camera {
                         ray_x_u
                     })();
 
-                    let corrected_distance =
-                        distance * (screen_x / self.focal_distance as f32).cos();
-                    let h = (canvas.height as f32 / corrected_distance) as u32;
-
-                    let h_bounded = h.min(canvas.height as u32);
-                    let offset = (canvas.height - h_bounded as usize) / 2;
-                    let mut color: u32;
-
                     // Going to step for every v for each pixel being drawn
                     let v_step: f32 = 1.0 / h as f32;
                     let mut v: f32 = 0.0;
 
                     // Check to see if player is too close to see the very top
+                    // Finds the proper initial v value if the top of the texture
+                    // is off screen.
                     if h > h_bounded {
                         let d = (h - h_bounded) / 2;
                         v = d as f32 / h as f32;
+                    }
+
+                    // If fog is being rendered, we also want it to appear above the block
+                    // This will make a skybox useless, so might add some sort of transparency as we go up
+                    if let CameraFog::VisibleDistance { fog_color, .. } = &self.camera_fog {
+                        for i in 0..offset {
+                            canvas.buffer.0[c][i] = *fog_color; // Testing additive colors in fog for the skybox
+                        }
                     }
 
                     for i in offset..offset + h_bounded as usize {

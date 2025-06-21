@@ -4,6 +4,10 @@ use minifb::Key;
 
 mod rendering;
 
+use rendering::Camera;
+use rendering::cameraspec;
+use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
+
 const WINDOW_W: usize = 700;
 const WINDOW_H: usize = 700;
 const FPS: usize = 60;
@@ -37,7 +41,11 @@ fn main() {
     let floor_color = from_u8_rgb(0, 0, 255);
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
-    let mut camera = rendering::Camera::new(FOCAL_DISTANCE, VIEWPORT_SIZE, RAY_FINENESS);
+    let camera_options: CameraOptions = cameraspec::CameraOptionsBuilder::new()
+                                .camera_fog(CameraFog::VisibleDistance { fog_dist: 2.0, fog_color: from_u8_rgb(50, 50, 50) })
+                                .into();
+    let mut camera: Camera = camera_options.into();
+
     camera.set_position(4.0, 4.0);
     canvas.set_target_fps(FPS);
     // Main loop
