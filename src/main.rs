@@ -4,9 +4,9 @@ use minifb::Key;
 
 mod rendering;
 
-use rendering::Camera;
 use rendering::cameraspec;
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
+use rendering::Camera;
 
 const WINDOW_W: usize = 700;
 const WINDOW_H: usize = 700;
@@ -42,15 +42,17 @@ fn main() {
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
     let camera_options: CameraOptions = cameraspec::CameraOptionsBuilder::new()
-                                .camera_fog(CameraFog::VisibleDistance { fog_dist: 2.0, fog_color: from_u8_rgb(50, 50, 50) })
-                                .into();
+        .camera_fog(CameraFog::VisibleDistance {
+            fog_dist: 2.0,
+            fog_color: from_u8_rgb(50, 50, 50),
+        })
+        .into();
     let mut camera: Camera = camera_options.into();
 
     camera.set_position(4.0, 4.0);
     canvas.set_target_fps(FPS);
     // Main loop
     loop {
-
         // Using a canvas thing here, might want to make a gamecontext struct?
         // No real need for that yet
         camera.draw_simple_floor(&mut canvas, floor_color);

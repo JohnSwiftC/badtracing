@@ -202,7 +202,10 @@ impl Camera {
 
                 use cameraspec::CameraFog;
                 match self.camera_fog {
-                    CameraFog::VisibleDistance { fog_dist, fog_color } => {
+                    CameraFog::VisibleDistance {
+                        fog_dist,
+                        fog_color,
+                    } => {
                         // Note that these are the scoped values from the enum
                         if distance > fog_dist {
                             for i in 0..offset + h_bounded as usize {
