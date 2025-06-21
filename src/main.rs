@@ -5,9 +5,9 @@ use minifb::Key;
 mod rendering;
 
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
-use rendering::Camera;
+use rendering::{Camera, Texture, Skybox};
 
-const WINDOW_W: usize = 700;
+const WINDOW_W: usize = 1000;
 const WINDOW_H: usize = 700;
 const FPS: usize = 60;
 const FOCAL_DISTANCE: f32 = WINDOW_H as f32 / WINDOW_W as f32;
@@ -22,7 +22,7 @@ fn main() {
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         vec![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
         vec![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-        vec![1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1],
+        vec![1, 1, 0, 2, 0, 0, 0, 2, 0, 0, 1, 1],
         vec![1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1],
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -34,17 +34,15 @@ fn main() {
     // force even more data to be moved around and passed to functions every frame
     // also the engine is bad, its in the name.
 
-    let skybox = rendering::Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
-    let wall_texture =
-        rendering::Texture::load_from_file("wall.jpg").expect("wall texture failed to load");
+    let skybox: Skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
+    let tony_texture: Texture = Texture::load_from_file("wall.jpg").unwrap_or(Texture::from_color(255));
+    let brick_texture: Texture = Texture::load_from_file("brick_wall.jpg").unwrap_or(Texture::from_color(255));
     let floor_color = from_u8_rgb(0, 0, 255);
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
     let camera_options: CameraOptions = CameraOptionsBuilder::new()
-        .camera_fog(CameraFog::VisibleDistance {
-            fog_dist: 2.0,
-            fog_color: from_u8_rgb(50, 50, 50),
-        })
+        .camera_fog(CameraFog::None)
+        .viewport_size(WINDOW_W as f32 / WINDOW_H as f32)
         .into();
     let mut camera: Camera = camera_options.into();
 
@@ -56,7 +54,7 @@ fn main() {
         // No real need for that yet
         camera.draw_simple_floor(&mut canvas, floor_color);
         camera.draw_skybox(&mut canvas, &skybox);
-        camera.main(&mut canvas, &map, &[&wall_texture]);
+        camera.main(&mut canvas, &map, &[&tony_texture, &brick_texture]);
         canvas.update();
 
         if canvas.is_key_down(Key::Right) {
