@@ -167,7 +167,10 @@ impl Camera {
         }
     }
 
-    pub fn raycast_map(&self, canvas: &mut Canvas, map: &Vec<Vec<usize>>, textures: &[&Texture]) {
+    /// This function is the main rendering function of the camera. Renders the map, draws fog optionally
+    /// must be used or changed for things that interact with the map, ie sprites or fog
+    /// (fog being rendered depends on whether or not it is broken by a piece of wall)
+    pub fn main(&self, canvas: &mut Canvas, map: &Vec<Vec<usize>>, textures: &[&Texture]) {
         for c in 0..canvas.width {
             // Calculate ray angle for this column
             let screen_x = (c as f32 / canvas.width as f32 - 0.5) * self.viewport_size;

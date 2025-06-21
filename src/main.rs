@@ -50,9 +50,12 @@ fn main() {
     canvas.set_target_fps(FPS);
     // Main loop
     loop {
+
+        // Using a canvas thing here, might want to make a gamecontext struct?
+        // No real need for that yet
         camera.draw_simple_floor(&mut canvas, floor_color);
         camera.draw_skybox(&mut canvas, &skybox);
-        camera.raycast_map(&mut canvas, &map, &[&wall_texture]);
+        camera.main(&mut canvas, &map, &[&wall_texture]);
         canvas.update();
 
         if canvas.is_key_down(Key::Right) {
