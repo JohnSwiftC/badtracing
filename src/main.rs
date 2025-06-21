@@ -4,7 +4,6 @@ use minifb::Key;
 
 mod rendering;
 
-use rendering::cameraspec;
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
 use rendering::Camera;
 
@@ -41,7 +40,7 @@ fn main() {
     let floor_color = from_u8_rgb(0, 0, 255);
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
-    let camera_options: CameraOptions = cameraspec::CameraOptionsBuilder::new()
+    let camera_options: CameraOptions = CameraOptionsBuilder::new()
         .camera_fog(CameraFog::VisibleDistance {
             fog_dist: 2.0,
             fog_color: from_u8_rgb(50, 50, 50),

@@ -78,7 +78,7 @@ impl Skybox {
 }
 
 #[derive(Clone, Copy)]
-struct Position {
+pub struct Position {
     x: f32,
     y: f32, // this is a 2d x,y coordinate plane
 }
