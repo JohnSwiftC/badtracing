@@ -3,11 +3,14 @@
 use minifb::Key;
 
 mod rendering;
+mod gamelogic;
 
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
 use rendering::{Camera, Texture, Skybox};
 
-const WINDOW_W: usize = 1000;
+use gamelogic::{Moveable};
+
+const WINDOW_W: usize = 700;
 const WINDOW_H: usize = 700;
 const FPS: usize = 60;
 const FOCAL_DISTANCE: f32 = WINDOW_H as f32 / WINDOW_W as f32;

@@ -6,6 +6,8 @@ use image::{DynamicImage, GenericImageView};
 use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
+use crate::gamelogic::{Moveable};
+
 const RAY_FINENESS: f32 = 100.0;
 
 pub struct Canvas {
@@ -42,6 +44,7 @@ impl Canvas {
     pub fn set_target_fps(&mut self, fps: usize) {
         self.window.set_target_fps(fps);
     }
+
 }
 
 pub struct Skybox {
@@ -79,8 +82,8 @@ impl Skybox {
 
 #[derive(Clone, Copy)]
 pub struct Position {
-    x: f32,
-    y: f32, // this is a 2d x,y coordinate plane
+    pub x: f32,
+    pub y: f32, // this is a 2d x,y coordinate plane
 }
 
 pub struct Camera {
@@ -90,6 +93,29 @@ pub struct Camera {
     viewport_size: f32,
     ray_fineness: f32,
     camera_fog: cameraspec::CameraFog,
+}
+
+impl Moveable for Camera {
+    fn get_position(&self) -> Position {
+        self.position
+    }
+    fn get_angle(&self) -> f32 {
+        self.view_angle
+    }
+    fn set_position(&mut self, x: f32, y: f32) {
+        self.position.x = x;
+        self.position.y = y;
+    }
+    fn set_angle(&mut self, theta: f32) {
+        self.view_angle = theta;
+    }
+    fn update_position(&mut self, x: f32, y: f32) {
+        self.position.x += x;
+        self.position.y += y;
+    }
+    fn update_angle(&mut self, theta: f32) {
+        self.view_angle += theta;
+    }
 }
 
 impl Camera {
@@ -102,48 +128,6 @@ impl Camera {
             ray_fineness: rf,
             camera_fog: cameraspec::CameraFog::None,
         }
-    }
-
-    /// Updates absolute position
-    pub fn set_position(&mut self, x: f32, y: f32) {
-        self.position.x = x;
-        self.position.y = y;
-    }
-
-    /// Updates relative position
-    pub fn update_position(&mut self, x: f32, y: f32) {
-        self.position.x += x;
-        self.position.y += y;
-    }
-
-    /// Updates relative position with collision detection
-    pub fn update_position_checked(&mut self, x: f32, y: f32, map: &Vec<Vec<usize>>) {
-        let new_x = self.position.x + x;
-        let new_y = self.position.y + y;
-
-        if map[new_y.floor() as usize][new_x.floor() as usize] == 0 {
-            self.position.x = new_x;
-            self.position.y = new_y;
-            return;
-        }
-
-        if map[new_y.floor() as usize][self.position.x.floor() as usize] == 0 {
-            self.position.y = new_y;
-        }
-
-        if map[self.position.y.floor() as usize][new_x.floor() as usize] == 0 {
-            self.position.x = new_x;
-        }
-    }
-
-    /// Updates absolute angle
-    pub fn set_angle(&mut self, theta: f32) {
-        self.view_angle = theta;
-    }
-
-    /// Updates relative angle
-    pub fn update_angle(&mut self, theta: f32) {
-        self.view_angle += theta;
     }
 
     pub fn draw_skybox(&mut self, canvas: &mut Canvas, skybox: &Skybox) {
