@@ -39,7 +39,7 @@ pub struct UserMovementController<'a> {
 impl<'a> UserMovementController<'a> {
     /// Reads movement inputs and enforces bounds checking
     /// For a supplied map
-    pub fn physics_input(&mut self, canvas: &Canvas, map: &Vec<Vec<usize>>) {
+    pub fn physics_input(&self, canvas: &Canvas, map: &Vec<Vec<usize>>) {
         
         if canvas.is_key_down(Key::Right) {
             unsafe { (*self.entity).update_angle(self.look_sense); }

@@ -54,7 +54,7 @@ fn main() {
     // I made the movement controller dereference a raw pointer
     // to a moveable trait object so watch yourself lmao
     // really just wanted to try it out, will probably shoot me in the foot later
-    let mut camera_controller = UserMovementController {
+    let camera_controller = UserMovementController {
         entity: &raw mut camera,
         move_speed: PLAYER_VELOCITY,
         look_sense: LOOK_SENSE,
