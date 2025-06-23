@@ -1,14 +1,12 @@
 #![allow(dead_code)]
 
-use minifb::Key;
-
 mod rendering;
 mod gamelogic;
 
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
 use rendering::{Camera, Texture, Skybox};
 
-use gamelogic::{Moveable};
+use gamelogic::{Moveable, UserMovementController};
 
 const WINDOW_W: usize = 700;
 const WINDOW_H: usize = 700;
@@ -47,10 +45,21 @@ fn main() {
         .camera_fog(CameraFog::None)
         .viewport_size(WINDOW_W as f32 / WINDOW_H as f32)
         .into();
+
     let mut camera: Camera = camera_options.into();
 
     camera.set_position(4.0, 4.0);
     canvas.set_target_fps(FPS);
+
+    // I made the movement controller dereference a raw pointer
+    // to a moveable trait object so watch yourself lmao
+    // really just wanted to try it out, will probably shoot me in the foot later
+    let mut camera_controller = UserMovementController {
+        entity: &raw mut camera,
+        move_speed: PLAYER_VELOCITY,
+        look_sense: LOOK_SENSE,
+        _marker: std::marker::PhantomData,
+    };
     // Main loop
     loop {
         // Using a canvas thing here, might want to make a gamecontext struct?
@@ -60,39 +69,7 @@ fn main() {
         camera.main(&mut canvas, &map, &[&tony_texture, &brick_texture]);
         canvas.update();
 
-        if canvas.is_key_down(Key::Right) {
-            camera.update_angle(LOOK_SENSE);
-        }
-
-        if canvas.is_key_down(Key::Left) {
-            camera.update_angle(-1.0 * LOOK_SENSE);
-        }
-
-        // Add all movements together THEN apply
-        let mut nx = 0.0;
-        let mut ny = 0.0;
-
-        if canvas.is_key_down(Key::W) {
-            nx += camera.view_angle.cos() * PLAYER_VELOCITY;
-            ny += camera.view_angle.sin() * PLAYER_VELOCITY;
-        }
-
-        if canvas.is_key_down(Key::S) {
-            nx += -1.0 * camera.view_angle.cos() * PLAYER_VELOCITY;
-            ny += -1.0 * camera.view_angle.sin() * PLAYER_VELOCITY;
-        }
-
-        if canvas.is_key_down(Key::A) {
-            nx += camera.view_angle.sin() * PLAYER_VELOCITY;
-            ny += -1.0 * camera.view_angle.cos() * PLAYER_VELOCITY;
-        }
-
-        if canvas.is_key_down(Key::D) {
-            nx += -1.0 * camera.view_angle.sin() * PLAYER_VELOCITY;
-            ny += camera.view_angle.cos() * PLAYER_VELOCITY;
-        }
-
-        camera.update_position_checked(nx, ny, &map);
+        camera_controller.physics_input(&canvas, &map);
     }
 }
 
