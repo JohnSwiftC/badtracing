@@ -37,6 +37,16 @@ pub struct UserMovementController<'a> {
 }
 
 impl<'a> UserMovementController<'a> {
+
+    pub fn new(entity: *mut dyn Moveable, move_speed: f32, look_sense: f32) -> Self {
+        Self {
+            entity,
+            move_speed,
+            look_sense,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
     /// Reads movement inputs and enforces bounds checking
     /// For a supplied map
     pub fn physics_input(&self, canvas: &Canvas, map: &Vec<Vec<usize>>) {
