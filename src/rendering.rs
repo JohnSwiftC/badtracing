@@ -6,7 +6,7 @@ use image::{DynamicImage, GenericImageView};
 use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
-use crate::gamelogic::{Moveable};
+use crate::gamelogic::Moveable;
 
 const RAY_FINENESS: f32 = 100.0;
 
@@ -44,7 +44,6 @@ impl Canvas {
     pub fn set_target_fps(&mut self, fps: usize) {
         self.window.set_target_fps(fps);
     }
-
 }
 
 pub struct Skybox {

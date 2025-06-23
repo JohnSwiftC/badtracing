@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
-mod rendering;
 mod gamelogic;
+mod rendering;
 
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
-use rendering::{Camera, Texture, Skybox};
+use rendering::{Camera, Skybox, Texture};
 
 use gamelogic::{Moveable, UserMovementController};
 
@@ -36,8 +36,10 @@ fn main() {
     // also the engine is bad, its in the name.
 
     let skybox: Skybox = Skybox::load_from_file("skybox.jpg").expect("skybox failed to load");
-    let tony_texture: Texture = Texture::load_from_file("wall.jpg").unwrap_or(Texture::from_color(255));
-    let brick_texture: Texture = Texture::load_from_file("brick_wall.jpg").unwrap_or(Texture::from_color(255));
+    let tony_texture: Texture =
+        Texture::load_from_file("wall.jpg").unwrap_or(Texture::from_color(255));
+    let brick_texture: Texture =
+        Texture::load_from_file("brick_wall.jpg").unwrap_or(Texture::from_color(255));
     let floor_color = from_u8_rgb(0, 0, 255);
 
     let mut canvas = rendering::Canvas::new("badtracing", WINDOW_W, WINDOW_H).unwrap();
@@ -54,7 +56,8 @@ fn main() {
     // I made the movement controller dereference a raw pointer
     // to a moveable trait object so watch yourself lmao
     // really just wanted to try it out, will probably shoot me in the foot later
-    let camera_controller = UserMovementController::new(&raw mut camera, PLAYER_VELOCITY, LOOK_SENSE);
+    let camera_controller =
+        UserMovementController::new(&raw mut camera, PLAYER_VELOCITY, LOOK_SENSE);
     // Main loop
     loop {
         // Using a canvas thing here, might want to make a gamecontext struct?

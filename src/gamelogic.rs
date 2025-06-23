@@ -1,4 +1,4 @@
-use crate::rendering::{Position, Canvas};
+use crate::rendering::{Canvas, Position};
 use minifb::Key;
 pub trait Moveable {
     fn get_position(&self) -> Position;
@@ -8,7 +8,7 @@ pub trait Moveable {
     fn update_position(&mut self, x: f32, y: f32);
     fn update_angle(&mut self, theta: f32);
     fn update_position_checked(&mut self, dx: f32, dy: f32, map: &Vec<Vec<usize>>) {
-        let Position { x, y} = self.get_position();
+        let Position { x, y } = self.get_position();
         let new_x = x + dx;
         let new_y = y + dy;
 
@@ -33,11 +33,10 @@ pub struct UserMovementController<'a> {
     pub entity: *mut dyn Moveable,
     pub move_speed: f32,
     pub look_sense: f32,
-    pub _marker: std::marker::PhantomData<&'a mut dyn Moveable>
+    pub _marker: std::marker::PhantomData<&'a mut dyn Moveable>,
 }
 
 impl<'a> UserMovementController<'a> {
-
     pub fn new(entity: *mut dyn Moveable, move_speed: f32, look_sense: f32) -> Self {
         Self {
             entity,
@@ -50,15 +49,18 @@ impl<'a> UserMovementController<'a> {
     /// Reads movement inputs and enforces bounds checking
     /// For a supplied map
     pub fn physics_input(&self, canvas: &Canvas, map: &Vec<Vec<usize>>) {
-        
         if canvas.is_key_down(Key::Right) {
-            unsafe { (*self.entity).update_angle(self.look_sense); }
+            unsafe {
+                (*self.entity).update_angle(self.look_sense);
+            }
         }
 
         if canvas.is_key_down(Key::Left) {
-            unsafe { (*self.entity).update_angle(-1.0 * self.look_sense); }
+            unsafe {
+                (*self.entity).update_angle(-1.0 * self.look_sense);
+            }
         }
-        
+
         let mut nx = 0.0;
         let mut ny = 0.0;
 
@@ -84,6 +86,8 @@ impl<'a> UserMovementController<'a> {
             ny += angle.cos() * self.move_speed;
         }
 
-        unsafe { (*self.entity).update_position_checked(nx, ny, map); }
+        unsafe {
+            (*self.entity).update_position_checked(nx, ny, map);
+        }
     }
 }
