@@ -139,10 +139,10 @@ impl Moveable for Camera {
     }
     fn update_angle(&mut self, theta: f32) {
         if theta < 0.0 {
-            self.view_angle +=  2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI));
+            self.view_angle =  2.0 * std::f32::consts::PI + ((theta + self.view_angle) % (2.0 * std::f32::consts::PI));
             return;
         }
-        self.view_angle += theta % (2.0 * std::f32::consts::PI);
+        self.view_angle = (theta + self.view_angle) % (2.0 * std::f32::consts::PI);
     }
 }
 
@@ -284,7 +284,20 @@ impl Camera {
     }
 
     pub fn render_sprites(&self, canvas: &mut Canvas, sprites: &[&Sprite]) {
-        
+        for &s in sprites {
+            let x = s.position.x - self.position.x;
+            let y = s.position.y - self.position.y;
+
+            let mut sprite_angle = (x / y).atan();
+            if sprite_angle < 0.0 {
+                sprite_angle = (2.0 * std::f32::consts::PI) + sprite_angle;
+            }
+
+            let (left_bound, right_bound) = {
+                // This gets the
+                let range = (self.viewport_size / 2.0 / self.focal_distance).atan() * 2.0;
+            }
+        }
     }
 }
 
