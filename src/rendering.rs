@@ -107,7 +107,7 @@ impl Moveable for Camera {
     }
     fn set_angle(&mut self, theta: f32) {
         if theta < 0.0 {
-            self.view_angle = (2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI)));
+            self.view_angle = 2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI));
             return;
         }
         self.view_angle = theta % (2.0 * std::f32::consts::PI);
@@ -118,7 +118,7 @@ impl Moveable for Camera {
     }
     fn update_angle(&mut self, theta: f32) {
         if theta < 0.0 {
-            self.view_angle +=  (2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI)));
+            self.view_angle +=  2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI));
             return;
         }
         self.view_angle += theta % (2.0 * std::f32::consts::PI);
