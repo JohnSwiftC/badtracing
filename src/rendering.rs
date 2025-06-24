@@ -85,6 +85,27 @@ pub struct Position {
     pub y: f32, // this is a 2d x,y coordinate plane
 }
 
+struct Sprite<'a> {
+    position: Position,
+    texture: &'a Texture,
+    scale: f32,
+}
+
+impl<'a> Sprite<'a> {
+    pub fn from_texture(texture: &'a Texture) -> Self {
+        Self {
+            position: Position { x: 0.0, y: 0.0 },
+            texture: texture,
+            scale: 1.0,
+        }
+    }
+
+    pub fn scale(mut self, scale: f32) -> Self {
+        self.scale = scale;
+        self
+    }
+}
+
 pub struct Camera {
     position: Position,
     pub view_angle: f32, // Principal axis is facing right, deviation is in radians.
@@ -260,6 +281,10 @@ impl Camera {
                 ray_y += dy;
             }
         }
+    }
+
+    pub fn render_sprites(&self, canvas: &mut Canvas, sprites: &[&Sprite]) {
+        
     }
 }
 
