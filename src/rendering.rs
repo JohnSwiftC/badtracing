@@ -106,14 +106,22 @@ impl Moveable for Camera {
         self.position.y = y;
     }
     fn set_angle(&mut self, theta: f32) {
-        self.view_angle = theta;
+        if theta < 0.0 {
+            self.view_angle = (2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI)));
+            return;
+        }
+        self.view_angle = theta % (2.0 * std::f32::consts::PI);
     }
     fn update_position(&mut self, x: f32, y: f32) {
         self.position.x += x;
         self.position.y += y;
     }
     fn update_angle(&mut self, theta: f32) {
-        self.view_angle += theta;
+        if theta < 0.0 {
+            self.view_angle +=  (2.0 * std::f32::consts::PI + (theta % (2.0 * std::f32::consts::PI)));
+            return;
+        }
+        self.view_angle += theta % (2.0 * std::f32::consts::PI);
     }
 }
 
