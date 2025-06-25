@@ -85,27 +85,6 @@ pub struct Position {
     pub y: f32, // this is a 2d x,y coordinate plane
 }
 
-struct Sprite<'a> {
-    position: Position,
-    texture: &'a Texture,
-    scale: f32,
-}
-
-impl<'a> Sprite<'a> {
-    pub fn from_texture(texture: &'a Texture) -> Self {
-        Self {
-            position: Position { x: 0.0, y: 0.0 },
-            texture: texture,
-            scale: 1.0,
-        }
-    }
-
-    pub fn scale(mut self, scale: f32) -> Self {
-        self.scale = scale;
-        self
-    }
-}
-
 pub struct Camera {
     position: Position,
     pub view_angle: f32, // Principal axis is facing right, deviation is in radians.
@@ -308,14 +287,13 @@ impl Camera {
                 (left_bound, right_bound)
             };
 
-            if left_bound < right_bound && sprite_angle > left_bound && sprite_angle < right_bound {
-
-            } else if left_bound > right_bound && sprite_angle > left_bound && sprite_angle > right_bound {
-
-            } else if left_bound > right_bound && sprite_angle < left_bound && sprite_angle < right_bound {
-
+            // Don't draw a sprite if its not in the visible angle of the camera
+            if !is_in_sector(left_bound, right_bound, sprite_angle) {
+                println!("Sprite is not in angle");
+                continue;
             }
 
+            println!("Sprite is in angle")
             
         }
     }
@@ -371,6 +349,56 @@ impl Texture {
 
         0
     }
+}
+
+pub struct Sprite<'a> {
+    position: Position,
+    texture: &'a Texture,
+    scale: f32,
+}
+
+impl<'a> Sprite<'a> {
+    pub fn from_texture(texture: &'a Texture) -> Self {
+        Self {
+            position: Position { x: 0.0, y: 0.0 },
+            texture: texture,
+            scale: 1.0,
+        }
+    }
+
+    pub fn scale(&mut self, scale: f32) {
+        self.scale = scale;
+    }
+
+}
+
+impl Moveable for Sprite<'_> {
+    fn get_position(&self) -> Position {
+        self.position
+    }
+
+    fn get_angle(&self) -> f32 {
+        0.0 // Redundant for sprites, atleast for now
+    }
+
+    fn set_angle(&mut self, _theta: f32) {
+        // None
+    }
+
+    fn set_position(&mut self, x: f32, y: f32) {
+        self.position.x = x;
+        self.position.y = y;
+    }
+
+    fn update_angle(&mut self, _theta: f32) {
+        // None
+    }
+
+    fn update_position(&mut self, x: f32, y: f32) {
+        self.position.x += x;
+        self.position.y += y;
+    }
+
 }
 
 pub struct Buffer2D(Vec<Vec<u32>>);

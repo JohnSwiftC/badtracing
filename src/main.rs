@@ -4,7 +4,7 @@ mod gamelogic;
 mod rendering;
 
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
-use rendering::{Camera, Skybox, Texture};
+use rendering::{Camera, Skybox, Texture, Sprite};
 
 use gamelogic::{Moveable, UserMovementController};
 
@@ -59,12 +59,16 @@ fn main() {
     let camera_controller =
         UserMovementController::new(&raw mut camera, PLAYER_VELOCITY, LOOK_SENSE);
     // Main loop
+
+    let mut test_sprite = Sprite::from_texture(&tony_texture);
+    test_sprite.set_position(4.0, 4.0);
     loop {
         // Using a canvas thing here, might want to make a gamecontext struct?
         // No real need for that yet
         camera.draw_simple_floor(&mut canvas, floor_color);
         camera.draw_skybox(&mut canvas, &skybox);
         camera.main(&mut canvas, &map, &[&tony_texture, &brick_texture]);
+        camera.render_sprites(&mut canvas, &[&test_sprite]);
         canvas.update();
 
         camera_controller.physics_input(&canvas, &map);
