@@ -4,7 +4,7 @@ mod gamelogic;
 mod rendering;
 
 use rendering::cameraspec::{CameraFog, CameraOptions, CameraOptionsBuilder};
-use rendering::{Camera, Skybox, Texture, Sprite};
+use rendering::{Camera, Skybox, Sprite, Texture};
 
 use gamelogic::{Moveable, UserMovementController};
 

@@ -118,7 +118,8 @@ impl Moveable for Camera {
     }
     fn update_angle(&mut self, theta: f32) {
         if theta < 0.0 {
-            self.view_angle =  2.0 * std::f32::consts::PI + ((theta + self.view_angle) % (2.0 * std::f32::consts::PI));
+            self.view_angle = 2.0 * std::f32::consts::PI
+                + ((theta + self.view_angle) % (2.0 * std::f32::consts::PI));
             return;
         }
         self.view_angle = (theta + self.view_angle) % (2.0 * std::f32::consts::PI);
@@ -294,7 +295,6 @@ impl Camera {
             }
 
             println!("Sprite is in angle")
-            
         }
     }
 }
@@ -369,7 +369,6 @@ impl<'a> Sprite<'a> {
     pub fn scale(&mut self, scale: f32) {
         self.scale = scale;
     }
-
 }
 
 impl Moveable for Sprite<'_> {
@@ -398,7 +397,6 @@ impl Moveable for Sprite<'_> {
         self.position.x += x;
         self.position.y += y;
     }
-
 }
 
 pub struct Buffer2D(Vec<Vec<u32>>);
@@ -462,12 +460,11 @@ fn decrease_brightness(color: u32, amount: u32) -> u32 {
 /// Returns true if an angle is within another two on the unit circle
 /// This function is intended for angles that are locked to [0, 2pi],
 /// thus the logic checks
-/// 
+///
 /// (Remember, a left bound could technically have a value greater than that of
 /// the right bound if the range straddles the positive y axis.)
 #[inline(always)]
 fn is_in_sector(left_bound: f32, right_bound: f32, angle: f32) -> bool {
-
     if left_bound < right_bound && angle > left_bound && angle < right_bound {
         return true;
     } else if left_bound > right_bound && angle > left_bound && angle > right_bound {
