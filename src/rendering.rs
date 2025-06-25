@@ -294,9 +294,19 @@ impl Camera {
             }
 
             let (left_bound, right_bound) = {
-                // This gets the
-                let range = (self.viewport_size / 2.0 / self.focal_distance).atan() * 2.0;
-            }
+                // This gets the angle between the camera border and the center focal line
+                // Then used to find the angles of the two camera borders globally
+                let deviation = (self.viewport_size / 2.0 / self.focal_distance).atan();
+
+                let mut left_bound = self.view_angle - deviation;
+                if left_bound < 0.0 {
+                    left_bound = (2.0 * std::f32::consts::PI) + left_bound;
+                }
+
+                let right_bound = (self.view_angle + deviation) % (2.0 * std::f32::consts::PI);
+
+                (left_bound, right_bound)
+            };
         }
     }
 }
