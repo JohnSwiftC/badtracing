@@ -4,7 +4,7 @@ pub mod cameraspec;
 
 use image::{DynamicImage, GenericImageView};
 use minifb::{Key, Window, WindowOptions};
-use std::path::Path;
+use std::{hint::spin_loop, path::Path};
 
 use crate::gamelogic::Moveable;
 
@@ -307,6 +307,16 @@ impl Camera {
 
                 (left_bound, right_bound)
             };
+
+            if left_bound < right_bound && sprite_angle > left_bound && sprite_angle < right_bound {
+
+            } else if left_bound > right_bound && sprite_angle > left_bound && sprite_angle > right_bound {
+
+            } else if left_bound > right_bound && sprite_angle < left_bound && sprite_angle < right_bound {
+
+            }
+
+            
         }
     }
 }
@@ -419,4 +429,24 @@ fn decrease_brightness(color: u32, amount: u32) -> u32 {
     }
 
     (r << 16) | (g << 8) | b
+}
+
+/// Returns true if an angle is within another two on the unit circle
+/// This function is intended for angles that are locked to [0, 2pi],
+/// thus the logic checks
+/// 
+/// (Remember, a left bound could technically have a value greater than that of
+/// the right bound if the range straddles the positive y axis.)
+#[inline(always)]
+fn is_in_sector(left_bound: f32, right_bound: f32, angle: f32) -> bool {
+
+    if left_bound < right_bound && angle > left_bound && angle < right_bound {
+        return true;
+    } else if left_bound > right_bound && angle > left_bound && angle > right_bound {
+        return true;
+    } else if left_bound > right_bound && angle < left_bound && angle < right_bound {
+        return true;
+    }
+
+    false
 }
