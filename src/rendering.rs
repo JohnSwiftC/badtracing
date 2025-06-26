@@ -4,7 +4,7 @@ pub mod cameraspec;
 
 use image::{DynamicImage, GenericImageView};
 use minifb::{Key, Window, WindowOptions};
-use std::{path::Path};
+use std::path::Path;
 
 use crate::gamelogic::Moveable;
 
@@ -273,7 +273,9 @@ impl Camera {
 
             // For some reason the view angle starts with a pi/2 offset relative to the
             // angle we want here. This gives an angle I can easily use to compare with the sprite angle
-            let adjusted_va = (self.view_angle + std::f32::consts::FRAC_PI_2 + std::f32::consts::PI) % (2.0 * std::f32::consts::PI);
+            let adjusted_va =
+                (self.view_angle + std::f32::consts::FRAC_PI_2 + std::f32::consts::PI)
+                    % (2.0 * std::f32::consts::PI);
 
             let mut sprite_angle = (x.abs() / y.abs()).atan();
             // Convert the angle given into [0, 2pi]
