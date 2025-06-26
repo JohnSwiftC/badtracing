@@ -4,7 +4,7 @@ pub mod cameraspec;
 
 use image::{DynamicImage, GenericImageView};
 use minifb::{Key, Window, WindowOptions};
-use std::{hint::spin_loop, path::Path};
+use std::{path::Path};
 
 use crate::gamelogic::Moveable;
 
@@ -118,8 +118,11 @@ impl Moveable for Camera {
     }
     fn update_angle(&mut self, theta: f32) {
         if theta < 0.0 {
-            self.view_angle = 2.0 * std::f32::consts::PI
-                + ((theta + self.view_angle) % (2.0 * std::f32::consts::PI));
+            self.view_angle += theta;
+            if self.view_angle < 0.0 {
+                self.view_angle += 2.0 * std::f32::consts::PI;
+            }
+            self.view_angle %= 2.0 * std::f32::consts::PI;
             return;
         }
         self.view_angle = (theta + self.view_angle) % (2.0 * std::f32::consts::PI);
@@ -268,22 +271,37 @@ impl Camera {
             let x = s.position.x - self.position.x;
             let y = s.position.y - self.position.y;
 
-            let mut sprite_angle = (x / y).atan();
-            if sprite_angle < 0.0 {
-                sprite_angle = (2.0 * std::f32::consts::PI) + sprite_angle;
+            // For some reason the view angle starts with a pi/2 offset relative to the
+            // angle we want here. This gives an angle I can easily use to compare with the sprite angle
+            let adjusted_va = (self.view_angle + std::f32::consts::FRAC_PI_2 + std::f32::consts::PI) % (2.0 * std::f32::consts::PI);
+
+            let mut sprite_angle = (x.abs() / y.abs()).atan();
+            // Convert the angle given into [0, 2pi]
+            if y < 0.0 && x > 0.0 {
+                sprite_angle = std::f32::consts::PI - sprite_angle;
+            } else if y > 0.0 && x < 0.0 {
+                sprite_angle = (2.0 * std::f32::consts::PI) - sprite_angle;
+            } else if y < 0.0 && x < 0.0 {
+                sprite_angle += std::f32::consts::PI;
             }
+
+            // For reasons I don't feel like looking into, the angle im getting here
+            // is rotating counter clockewise from a birds eye view. This swaps the direction.
+            sprite_angle = (2.0 * std::f32::consts::PI) - sprite_angle;
+
+            //println!("{} : {}", sprite_angle, adjusted_va);
 
             let (left_bound, right_bound) = {
                 // This gets the angle between the camera border and the center focal line
                 // Then used to find the angles of the two camera borders globally
                 let deviation = (self.viewport_size / 2.0 / self.focal_distance).atan();
 
-                let mut left_bound = self.view_angle - deviation;
+                let mut left_bound = adjusted_va - deviation;
                 if left_bound < 0.0 {
                     left_bound = (2.0 * std::f32::consts::PI) + left_bound;
                 }
 
-                let right_bound = (self.view_angle + deviation) % (2.0 * std::f32::consts::PI);
+                let right_bound = (adjusted_va + deviation) % (2.0 * std::f32::consts::PI);
 
                 (left_bound, right_bound)
             };
