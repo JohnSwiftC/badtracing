@@ -293,7 +293,7 @@ impl Camera {
 
             //println!("{} : {}", sprite_angle, adjusted_va);
 
-            let (left_bound, right_bound) = {
+            let (left_bound, right_bound, sector_angle) = {
                 // This gets the angle between the camera border and the center focal line
                 // Then used to find the angles of the two camera borders globally
                 let deviation = (self.viewport_size / 2.0 / self.focal_distance).atan();
@@ -305,16 +305,24 @@ impl Camera {
 
                 let right_bound = (adjusted_va + deviation) % (2.0 * std::f32::consts::PI);
 
-                (left_bound, right_bound)
+                (left_bound, right_bound, deviation * 2.0)
             };
 
             // Don't draw a sprite if its not in the visible angle of the camera
-            if !is_in_sector(left_bound, right_bound, sprite_angle) {
-                println!("Sprite is not in angle");
-                continue;
-            }
+            let c = match is_in_sector(left_bound, right_bound, sprite_angle) {
+                Ok(a) => {
+                    let v = a / sector_angle;
+                    (v * canvas.width as f32) as usize
+                }
+                Err(()) => continue,
+            };
 
-            println!("Sprite is in angle")
+            // c is the column to draw the sprite on
+
+            for i in 0..canvas.width {
+                canvas.buffer.0[c][i] = 255;
+            }
+            
         }
     }
 }
@@ -484,14 +492,14 @@ fn decrease_brightness(color: u32, amount: u32) -> u32 {
 /// (Remember, a left bound could technically have a value greater than that of
 /// the right bound if the range straddles the positive y axis.)
 #[inline(always)]
-fn is_in_sector(left_bound: f32, right_bound: f32, angle: f32) -> bool {
+fn is_in_sector(left_bound: f32, right_bound: f32, angle: f32) -> Result<f32, ()> {
     if left_bound < right_bound && angle > left_bound && angle < right_bound {
-        return true;
+        return Ok(angle - left_bound);
     } else if left_bound > right_bound && angle > left_bound && angle > right_bound {
-        return true;
+        return Ok(angle - left_bound);
     } else if left_bound > right_bound && angle < left_bound && angle < right_bound {
-        return true;
+        return Ok((2.0 * std::f32::consts::PI) - left_bound + angle);
     }
 
-    false
+    Err(())
 }
