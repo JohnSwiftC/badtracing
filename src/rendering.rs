@@ -317,8 +317,10 @@ impl Camera {
                 Err(()) => continue,
             };
 
+            let screen_x = (c as f32 / canvas.width as f32 - 0.5) * self.viewport_size;
             let distance = (x * x + y * y).sqrt();
-            let h = (canvas.height as f32 / distance) as u32;
+            let corrected_distance = distance * (screen_x / self.focal_distance as f32).cos();
+            let h = (canvas.height as f32 / corrected_distance) as u32;
             let h_bounded = h.min(canvas.height as u32);
             let offset = (canvas.height - h_bounded as usize) / 2;
 
@@ -341,7 +343,8 @@ impl Camera {
             if corrected_width / 2 <= c {
                 left = c - corrected_width / 2;
                 u_bounded = 0.0;
-            } else { // Adjust u 
+            } else {
+                // Adjust u
                 u_bounded = ((corrected_width / 2) - c) as f32 * u_step;
             }
 
@@ -355,11 +358,10 @@ impl Camera {
                 for k in left..right_bounded {
                     canvas.buffer.0[k][i] = s.texture.get_pixel_uv(u, v);
                     u += u_step;
-                } 
+                }
                 u = u_bounded;
                 v += v_step;
             }
-
         }
     }
 }
