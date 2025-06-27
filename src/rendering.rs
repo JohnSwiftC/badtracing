@@ -317,12 +317,49 @@ impl Camera {
                 Err(()) => continue,
             };
 
+            let distance = (x * x + y * y).sqrt();
+            let h = (canvas.height as f32 / distance) as u32;
+            let h_bounded = h.min(canvas.height as u32);
+            let offset = (canvas.height - h_bounded as usize) / 2;
+
+            // Get a correct width
+
+            let aspect_ratio = s.texture.width as f32 / s.texture.height as f32;
+            let corrected_width = (aspect_ratio * h as f32).floor() as usize;
+
             // c is the column to draw the sprite on
 
-            for i in 0..canvas.width {
-                canvas.buffer.0[c][i] = 255;
+            let mut v = 0.0;
+            let v_step = 1.0 / h_bounded as f32;
+
+            let mut u;
+            let u_step = 1.0 / corrected_width as f32;
+            let u_bounded: f32;
+
+            // Bounding to 0 isnt really something to do here because of the unsigned type
+            let mut left = 0;
+            if corrected_width / 2 <= c {
+                left = c - corrected_width / 2;
+                u_bounded = 0.0;
+            } else { // Adjust u 
+                u_bounded = ((corrected_width / 2) - c) as f32 * u_step;
             }
-            
+
+            u = u_bounded;
+
+            let right = c + corrected_width / 2;
+            let right_bounded = right.min(canvas.width);
+
+            // Each i, k pair should be a pixel being drawn for the sprite
+            for i in offset..offset + h_bounded as usize {
+                for k in left..right_bounded {
+                    canvas.buffer.0[k][i] = s.texture.get_pixel_uv(u, v);
+                    u += u_step;
+                } 
+                u = u_bounded;
+                v += v_step;
+            }
+
         }
     }
 }
