@@ -16,6 +16,7 @@ pub struct Canvas {
     pub width: usize,
     pub height: usize,
     screen_buffer: Vec<u32>,
+    depth_buffer: Vec<f32>,
 }
 
 impl Canvas {
@@ -26,6 +27,7 @@ impl Canvas {
             width,
             height,
             screen_buffer: vec![0; width * height],
+            depth_buffer: vec![std::f32::MAX; width], // Depth for each column on the canvas
         })
     }
 
@@ -35,6 +37,12 @@ impl Canvas {
             .window
             .update_with_buffer(&self.screen_buffer, self.width, self.height);
         self.buffer.flush();
+    }
+
+    pub fn flush_depth(&mut self) {
+        for c in &mut self.depth_buffer {
+            *c = std::f32::MAX;
+        }
     }
 
     pub fn is_key_down(&self, key: Key) -> bool {
