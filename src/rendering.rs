@@ -4,7 +4,7 @@ pub mod cameraspec;
 
 use image::{DynamicImage, GenericImageView};
 use minifb::{Key, Window, WindowOptions};
-use std::path::Path;
+use std::{path::Path};
 
 use crate::gamelogic::Moveable;
 
@@ -37,9 +37,11 @@ impl Canvas {
             .window
             .update_with_buffer(&self.screen_buffer, self.width, self.height);
         self.buffer.flush();
+        self.flush_depth();
     }
 
-    pub fn flush_depth(&mut self) {
+    /// Resets the depth buffer for every column to be at max depth
+    fn flush_depth(&mut self) {
         for c in &mut self.depth_buffer {
             *c = std::f32::MAX;
         }
@@ -199,6 +201,7 @@ impl Camera {
                     + (ray_y - self.position.y).powf(2.0))
                 .sqrt();
                 let corrected_distance = distance * (screen_x / self.focal_distance as f32).cos();
+
                 let h = (canvas.height as f32 / corrected_distance) as u32;
                 let h_bounded = h.min(canvas.height as u32);
                 let offset = (canvas.height - h_bounded as usize) / 2;
@@ -222,6 +225,13 @@ impl Camera {
                 }
 
                 if map[ray_y_floor as usize][ray_x_floor as usize] != 0 {
+                    // Lets quickly see if we should draw this
+                    if canvas.depth_buffer[c] < corrected_distance {
+                        break;
+                    }
+
+                    canvas.depth_buffer[c] = corrected_distance;
+
                     // Texturing, u and v values found and used
                     let mut color: u32;
 
@@ -364,6 +374,15 @@ impl Camera {
             // Each i, k pair should be a pixel being drawn for the sprite
             for i in offset..offset + h_bounded as usize {
                 for k in left..right_bounded {
+                    if canvas.depth_buffer[k] < corrected_distance {
+                        u += u_step; // Make sure we still texture correctly
+                        continue; // This will check depth for every column,
+                        // Should rework loop to do this column by column instead of the
+                        // current row by row to stop repeat checks on the columns
+                        // TODO
+                    } else {
+                        canvas.depth_buffer[k] = corrected_distance;
+                    }
                     canvas.buffer.0[k][i] = s.texture.get_pixel_uv(u, v);
                     u += u_step;
                 }
