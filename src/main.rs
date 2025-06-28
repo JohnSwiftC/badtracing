@@ -61,7 +61,8 @@ fn main() {
     // Main loop
 
     let mut test_sprite = Sprite::from_texture(&tony_texture);
-    test_sprite.set_position(4.0, 4.0);
+    test_sprite.set_position(4.2, 4.2);
+    test_sprite.scale(0.5);
     loop {
         // Using a canvas thing here, might want to make a gamecontext struct?
         // No real need for that yet

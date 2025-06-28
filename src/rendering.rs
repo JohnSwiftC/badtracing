@@ -339,13 +339,18 @@ impl Camera {
             let distance = (x * x + y * y).sqrt();
             let corrected_distance = distance * (screen_x / self.focal_distance as f32).cos();
             let h = (canvas.height as f32 / corrected_distance) as u32;
+
             let h_bounded = h.min(canvas.height as u32);
-            let offset = (canvas.height - h_bounded as usize) / 2;
+            let mut offset = (canvas.height - h_bounded as usize) / 2;
+
+            // Apply scaling magics
+            let scaled_h = (h_bounded as f32 * s.scale) as u32;
+            offset += (h_bounded - scaled_h) as usize;
+            let h_bounded = scaled_h; // Quick reassign
 
             // Get a correct width
-
             let aspect_ratio = s.texture.width as f32 / s.texture.height as f32;
-            let corrected_width = (aspect_ratio * h as f32).floor() as usize;
+            let corrected_width = (aspect_ratio * h_bounded as f32).floor() as usize;
 
             // c is the column to draw the sprite on
 
