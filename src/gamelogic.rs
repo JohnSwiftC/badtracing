@@ -1,5 +1,6 @@
 use crate::rendering::{Canvas, Position, Texture};
 use minifb::Key;
+
 pub trait Moveable {
     fn get_position(&self) -> Position;
     fn get_angle(&self) -> f32;
@@ -121,5 +122,33 @@ impl<'a> Animation<'a> {
     pub fn add_frame(&mut self, texture: &'a Texture) {
         self.frames.push(texture);
     }
-    
+
+    pub fn get_curr_frame(&self) -> Result<&'a Texture, AnimationError> {
+        if self.curr_frame >= self.frames.len() {
+            Err(AnimationError::NonExistentFrame)
+        } else {
+            Ok(self.frames[self.curr_frame])
+        }
+    }
+
+}
+
+#[derive(Debug, Clone)]
+pub enum AnimationError {
+    NonExistentFrame,
+}
+
+impl std::fmt::Display for AnimationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        // Leaving space for other variants
+        match self {
+            &AnimationError::NonExistentFrame => write!(f, "requested frame does not exist"),
+        }
+    }
+}
+
+impl std::error::Error for AnimationError {}
+
+pub struct AnimationManager {
+
 }
