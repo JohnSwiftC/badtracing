@@ -142,6 +142,8 @@ impl<'a> Animation<'a> {
                     } else {
                         self.curr_frame += 1;
                     }
+
+                    self.last_frame_time = SystemTime::now();
                 }
             },
             Err(_) => {
