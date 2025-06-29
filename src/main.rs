@@ -13,7 +13,7 @@ const WINDOW_H: usize = 700;
 const FPS: usize = 60;
 const FOCAL_DISTANCE: f32 = WINDOW_H as f32 / WINDOW_W as f32;
 const VIEWPORT_SIZE: f32 = 1.0; // Width of the viewport used for calculations
-const RAY_FINENESS: f32 = 100.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
+const RAY_FINENESS: f32 = 200.0; // How much the dx and dy are divided by for each step in the raycast. Higher values lead to more accurate casts but slower performance
 const PLAYER_VELOCITY: f32 = 0.04; // Scales the movement amount determined by the sin and cosine
 const LOOK_SENSE: f32 = 0.02; // Speed of rotation with arrow keys
 

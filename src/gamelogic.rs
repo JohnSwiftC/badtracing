@@ -1,4 +1,4 @@
-use crate::rendering::{Canvas, Position};
+use crate::rendering::{Canvas, Position, Texture};
 use minifb::Key;
 pub trait Moveable {
     fn get_position(&self) -> Position;
@@ -90,4 +90,36 @@ impl<'a> UserMovementController<'a> {
             (*self.entity).update_position_checked(nx, ny, map);
         }
     }
+}
+
+pub struct Animation<'a> {
+    frames: Vec<&'a Texture>,
+    curr_frame: usize,
+    timing: u32,
+    last_frame_time: u32
+}
+
+impl<'a> Animation<'a> {
+    pub fn new() -> Self {
+        Self {
+            frames: Vec::new(),
+            curr_frame: 0,
+            timing: 1,
+            last_frame_time: 0,
+        }
+    }
+
+    pub fn new_with_capacity(capacity: usize) -> Self {
+        Self {
+            frames: Vec::with_capacity(capacity),
+            curr_frame: 0,
+            timing: 1,
+            last_frame_time: 0,
+        }
+    }
+
+    pub fn add_frame(&mut self, texture: &'a Texture) {
+        self.frames.push(texture);
+    }
+    
 }
