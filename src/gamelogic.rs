@@ -1,5 +1,6 @@
 use crate::rendering::{Canvas, Position, Texture};
 use minifb::Key;
+use std::time::{Duration, SystemTime};
 
 pub trait Moveable {
     fn get_position(&self) -> Position;
@@ -96,8 +97,8 @@ impl<'a> UserMovementController<'a> {
 pub struct Animation<'a> {
     frames: Vec<&'a Texture>,
     curr_frame: usize,
-    timing: u32,
-    last_frame_time: u32
+    timing: Duration,
+    last_frame_time: SystemTime,
 }
 
 impl<'a> Animation<'a> {
@@ -105,8 +106,8 @@ impl<'a> Animation<'a> {
         Self {
             frames: Vec::new(),
             curr_frame: 0,
-            timing: 1,
-            last_frame_time: 0,
+            timing: Duration::new(0, 0),
+            last_frame_time: SystemTime::now(),
         }
     }
 
@@ -114,8 +115,8 @@ impl<'a> Animation<'a> {
         Self {
             frames: Vec::with_capacity(capacity),
             curr_frame: 0,
-            timing: 1,
-            last_frame_time: 0,
+            timing: Duration::new(0, 0),
+            last_frame_time: SystemTime::now(),
         }
     }
 
@@ -128,6 +129,24 @@ impl<'a> Animation<'a> {
             Err(AnimationError::NonExistentFrame)
         } else {
             Ok(self.frames[self.curr_frame])
+        }
+    }
+
+    /// Advances the current frame the animation if the alloted time for each frame has been passed
+    pub fn checked_advance(&mut self) {
+        match self.last_frame_time.elapsed() {
+            Ok(d) => {
+                if self.timing >= d {
+                    if self.curr_frame + 1 == self.frames.len() {
+                        self.curr_frame = 0;
+                    } else {
+                        self.curr_frame += 1;
+                    }
+                }
+            },
+            Err(_) => {
+                self.last_frame_time = SystemTime::now();
+            }
         }
     }
 
