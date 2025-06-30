@@ -157,6 +157,7 @@ impl<'a> Animation<'a> {
 #[derive(Debug, Clone)]
 pub enum AnimationError {
     NonExistentFrame,
+    NonExistentAnimation,
 }
 
 impl std::fmt::Display for AnimationError {
@@ -164,12 +165,25 @@ impl std::fmt::Display for AnimationError {
         // Leaving space for other variants
         match self {
             &AnimationError::NonExistentFrame => write!(f, "requested frame does not exist"),
+            &AnimationError::NonExistentAnimation => write!(f, "requested animation does not exist"),
         }
     }
 }
 
 impl std::error::Error for AnimationError {}
 
-pub struct AnimationManager {
+pub struct AnimationManager<'a> {
+    animations: Vec<Animation<'a>>,
+    curr_animation: usize,
+}
 
+impl<'a> AnimationManager<'a> {
+    pub fn set_animation(&mut self, animation: usize) -> Result<(), AnimationError> {
+        if animation >= self.animations.len() {
+            Err(AnimationError::NonExistentAnimation)
+        } else {
+            self.curr_animation = animation;
+            Ok(())
+        }
+    }
 }
